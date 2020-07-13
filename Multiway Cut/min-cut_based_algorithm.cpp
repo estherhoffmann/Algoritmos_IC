@@ -10,43 +10,37 @@
 #include <lemon/concepts/digraph.h>
 #include <lemon/preflow.h>
 
-
-
 using namespace std;
 using namespace lemon;
 
+int DEBUG = 0;
+int DEBUG_EXPENSIVE_CUT = 0;
+
 //these "printing_" functions are just to understand what is going on
-void printing_graph_arcs(ListDigraph &digraph, ListDigraph::ArcMap<int> &capacity, vector<int> &terminals)
+void printing_graph(ListDigraph &digraph, ListDigraph::ArcMap<int> &capacity, vector<int> &terminals)
 {
     for (ListDigraph::ArcIt m(digraph); m != INVALID; ++m)
     {
-        cout << "Arc: (" << digraph.id(digraph.source(m))
-            << ", " << digraph.id(digraph.target(m))
-            << "), id: " << digraph.id(m)
-            << ", cost: " << capacity[m] << endl;
+        cout << "Arc: (" << digraph.id(digraph.source(m))+1
+            << ", " << digraph.id(digraph.target(m))+1
+            << "), cost: " << capacity[m] << endl;
     }
 
     cout << endl << "Number of nodes: " << countNodes(digraph) << endl;
     cout << "Number of arcs: " << countArcs(digraph) << endl;
     cout << "Terminals:";
     for (auto it = terminals.begin(); it != terminals.end(); ++it)
-        cout << ' ' << *it ;
-    cout << endl << endl;
+        cout << ' ' << (*it)+1 ;
+    cout << endl;
 }
 
 
-void printing_minimum_cut(ListDigraph &digraph, vector<int> &terminals,
-                            vector<vector<ListDigraph::Arc>> &cut_arcs, vector<int> &max_flow_values)
+void printing_mincut_values(vector<int> &min_cut_values)
 {
-    cout << "Min cut values: ";
-    for(int i=0; i < max_flow_values.size(); i++)
-        cout << max_flow_values[i] << " ";
-
-    cout << endl << "Arcs of the (total) cut:";
-    for (int terminal=0; terminal < cut_arcs.size(); terminal++)
-        for(int arc=0; arc < cut_arcs[terminal].size(); arc++)
-            cout << " " << digraph.id(cut_arcs[terminal][arc]);
-    cout << endl << endl;
+    cout << "Min Cut Values: ";
+    for(int i=0; i < min_cut_values.size(); i++)
+        cout << min_cut_values[i] << " ";
+    cout << endl;
 }
 
 
@@ -55,11 +49,50 @@ void printing_nodes_reachable_from_source_mincut(ListDigraph &digraph, ListDigra
     cout << "Nodes reachable from source in the mincut:";
     for (ListDigraph::NodeIt n(digraph); n != INVALID; ++n)
         if(mincut[n] == true)
-            cout << " " << digraph.id(n);
+            cout << " " << (digraph.id(n))+1;
 
     cout << endl;
 }
 
+int printing_multiway_vector(vector<vector<tuple <int,int> > > &multiway_cut)
+{
+    int num_edges = 0;
+    cout << "Multiway_cut vector: " << endl;
+    for(int i=0; i < multiway_cut.size(); i++)
+    {
+        cout << i << "º: ";
+        for(int j=0; j < multiway_cut[i].size(); j++)
+        {
+            cout << "(" << get<0>(multiway_cut[i][j]) << ", " << get<1>(multiway_cut[i][j]) << ") ";
+            num_edges++;
+        }
+        cout << endl;
+    }
+    cout << endl;
+    return num_edges;
+}
+
+
+void printing_solution(ListDigraph &digraph,
+                            vector<vector<ListDigraph::Arc>> &cut_arcs,
+                            vector<vector<tuple <int,int> > > &multiway_cut,
+                            int multiway_cut_cost)
+{   /*
+    cout << "Arcs of the multiway cut: ";
+    int num_arcs = 0;
+    for (int terminal=0; terminal < cut_arcs.size(); terminal++)
+        for(int arc=0; arc < cut_arcs[terminal].size(); arc++)
+        {
+            cout << digraph.id(cut_arcs[terminal][arc]) << " ";
+            num_arcs++;
+        }
+    cout << endl << "Number of arcs:" << num_arcs << endl << endl;
+    */
+    int num_edges = printing_multiway_vector(multiway_cut);
+    cout << "Number of edges: " << num_edges << endl;
+
+    cout << "Cost of multiway cut: " << multiway_cut_cost << endl;
+}
 
 //reads graph file, creating a digraph
 void read_graph(ListDigraph &digraph, string file_name,
@@ -107,12 +140,13 @@ void read_graph(ListDigraph &digraph, string file_name,
 
 int position_highest_value_in_vector(vector<int> &vector)
 {
-    int position, highest_value = 0;
+    int position = 0, highest_value = 0;
 
     for(int i=0; i < vector.size(); i++)
     {
-        if(vector[i] > highest_value);
+        if(vector[i] > highest_value)
         {
+            //cout << "position: " << position << ", highest_value: " << highest_value << endl;
             highest_value = vector[i];
             position = i;
         }
@@ -124,24 +158,35 @@ int position_highest_value_in_vector(vector<int> &vector)
 int get_rid_of_most_expensive_cut(ListDigraph &digraph, ListDigraph::ArcMap<int> &capacity,
                                 vector<vector<ListDigraph::Arc> > &cut_arcs,
                                 vector<vector<tuple <int,int> > > &multiway_cut,
-                                vector<int> &max_flow_values)
+                                vector<int> &min_cut_values)
 {
-    int multiway_cut_cost = 0;
-    int most_exp_terminal_cut = position_highest_value_in_vector(max_flow_values);
-    int edge_cost = 0;
+    int most_exp_terminal_cut = position_highest_value_in_vector(min_cut_values);
+
+    if (DEBUG_EXPENSIVE_CUT == 1)
+    {
+        cout << "Getting rid of most expensive cut...." << endl;
+        printing_multiway_vector(multiway_cut);
+        printing_mincut_values(min_cut_values);
+        cout << "Most expensive terminal cut: " << most_exp_terminal_cut
+            << " with value " << min_cut_values[most_exp_terminal_cut]<< endl;
+
+    }
 
     cut_arcs.erase(cut_arcs.begin()+most_exp_terminal_cut);
     multiway_cut.erase(multiway_cut.begin()+most_exp_terminal_cut);
 
-    //cout << endl << "Adicionando: " << endl;
+    if (DEBUG_EXPENSIVE_CUT == 1)
+        printing_multiway_vector(multiway_cut);
+
+    int multiway_cut_cost = 0;
+    int edge_cost = 0;
+
     for(int i=0; i < multiway_cut.size(); i++)
     {
         for(int j=0; j < multiway_cut[i].size(); j++)
         {
             edge_cost = capacity[findArc(digraph, digraph.nodeFromId((get<0>(multiway_cut[i][j]))-1),
                                             digraph.nodeFromId((get<1>(multiway_cut[i][j])-1)) )];
-            //cout << "(" << get<0>(multiway_cut[i][j]) << ", "
-            //            << get<1>(multiway_cut[i][j]) << ") = "<< edge_cost << endl;
             multiway_cut_cost += edge_cost;
         }
     }
@@ -158,9 +203,13 @@ void update_multiwaycut_and_arcs(ListDigraph &digraph, ListDigraph::NodeMap<bool
     tuple <int, int> aux_tuple, reverse_aux_tuple;
     vector<ListDigraph::Arc> aux_arcs_vector;
     vector<tuple<int, int>> aux_tuple_vector;
-    bool not_already_in_cut;
+    bool not_already_in_cut = true;
 
-    //cout << "-" << endl << "Arcs from mincut of this iteration:" << endl;
+    if (DEBUG >= 3)
+    {
+        cout << "Arcs from mincut of this iteration:" << endl;
+    }
+
     for(ListDigraph::NodeIt node_in_cut(digraph); node_in_cut != INVALID; ++node_in_cut)
     {
         if(mincut[node_in_cut] == true)
@@ -176,8 +225,11 @@ void update_multiwaycut_and_arcs(ListDigraph &digraph, ListDigraph::NodeMap<bool
                     aux_tuple = make_tuple(digraph.id(node_in_cut)+1, digraph.id(target_node)+1);
                     reverse_aux_tuple = make_tuple(get<1>(aux_tuple), get<0>(aux_tuple));
 
-                    //cout << " " << digraph.id(a) << ": (" << get<0>(aux_tuple)
-                    //    << ", " << get<1>(aux_tuple) << ")" <<  endl;
+                    if (DEBUG >= 3)
+                    {
+                        cout << "(" << get<0>(aux_tuple)
+                            << ", " << get<1>(aux_tuple) << ")" <<  endl;
+                    }
 
                     //if tuple or reverse tuple are already in the multiway_cut
                     for(int i=0; i < multiway_cut.size(); i++)
@@ -199,17 +251,17 @@ void update_multiwaycut_and_arcs(ListDigraph &digraph, ListDigraph::NodeMap<bool
     multiway_cut.push_back(aux_tuple_vector);
 }
 
-//get cut_arcs, multiway_cut and returns the cost of this cut, based on our digraph and terminals
+
 int get_multiway_cut(ListDigraph &digraph, ListDigraph::ArcMap<int> &capacity, vector<int> &terminals,
                    vector<vector<ListDigraph::Arc>> &cut_arcs, vector<vector<tuple <int, int>>> &multiway_cut)
 {
    ListDigraph::NodeMap<bool> mincut(digraph);
-   vector<int> max_flow_values; //keeps the max flow value of each iteration
+   vector<int> min_cut_values; //keeps the max flow value of each iteration
 
    ListDigraph::Node artificial_sink = digraph.addNode();
    ListDigraph::Arc infinity_arc;
 
-   //creating infinity arcs from all the terminals to the artificial_sink
+   //creating "infinity" arcs from all the terminals to the artificial_sink
    for (int t = 0; t < terminals.size(); t++)
    {
        infinity_arc = digraph.addArc(digraph.nodeFromId(terminals[t]), artificial_sink);
@@ -221,19 +273,30 @@ int get_multiway_cut(ListDigraph &digraph, ListDigraph::ArcMap<int> &capacity, v
    {
        digraph.erase(findArc(digraph, digraph.nodeFromId(terminals[current_term]), artificial_sink));
 
-       //cout <<  "-----" << endl << "Iteration with source = terminal " << terminals[current_term] << endl << endl;
-       //printing_graph_arcs(digraph, capacity, terminals);
+       if (DEBUG >= 2)
+       {
+           cout <<  "-----" << endl << "Iteration with source = terminal " << terminals[current_term] << endl << endl;
+           if (DEBUG >=4)
+           {
+               printing_graph(digraph, capacity, terminals);
+           }
+       }
 
        //min-cut algorithm from lemon
        Preflow<ListDigraph> preflow(digraph, capacity, digraph.nodeFromId(terminals[current_term]), artificial_sink);
        preflow.runMinCut();
        preflow.minCutMap(mincut);
-       max_flow_values.push_back(preflow.flowValue());
+       min_cut_values.push_back(preflow.flowValue());
 
        update_multiwaycut_and_arcs(digraph, mincut, cut_arcs, multiway_cut);
 
-       //printing_nodes_reachable_from_source_mincut(digraph, mincut);
-       //printing_minimum_cut(digraph, terminals, cut_arcs, max_flow_values);
+       if (DEBUG >= 2)
+       {
+           //printing_nodes_reachable_from_source_mincut(digraph, mincut);
+           cout << endl;
+           printing_mincut_values(min_cut_values);
+           cout << endl;
+       }
 
        infinity_arc = digraph.addArc(digraph.nodeFromId(terminals[current_term]), artificial_sink);
        capacity[infinity_arc] = numeric_limits<int>::max();
@@ -246,13 +309,17 @@ int get_multiway_cut(ListDigraph &digraph, ListDigraph::ArcMap<int> &capacity, v
    }
    digraph.erase(artificial_sink);
 
-   int multiway_cut_cost = get_rid_of_most_expensive_cut(digraph, capacity, cut_arcs, multiway_cut, max_flow_values);
+   int multiway_cut_cost = get_rid_of_most_expensive_cut(digraph, capacity, cut_arcs, multiway_cut, min_cut_values);
 
-   //cout << "-----" << endl << "Final print to make sure the graph has returned to original form: " << endl;
-   //printing_graph_arcs(digraph, capacity, terminals);
+   if (DEBUG >= 4)
+   {
+       cout << "-----" << endl << "Final print to make sure the graph has returned to original form: " << endl;
+       printing_graph(digraph, capacity, terminals);
+   }
 
    return multiway_cut_cost;
 }
+
 
 int main()
 {
@@ -263,7 +330,11 @@ int main()
     string file_name;
     cin >> file_name;
     read_graph(digraph, file_name, capacity, terminals);
-    //printing_graph_arcs(digraph, capacity, terminals);
+
+    if (DEBUG >= 1)
+    {
+        printing_graph(digraph, capacity, terminals);
+    }
 
     //vector of vectors that storages the Arcs of the cut of each iteration.
     vector< vector<ListDigraph::Arc> > cut_arcs;
@@ -272,27 +343,8 @@ int main()
 
     int multiway_cut_cost = get_multiway_cut(digraph, capacity, terminals, cut_arcs, multiway_cut);
 
-    cout << "Arcs of the multiway cut: ";
-    int num_arcs = 0;
-    for (int terminal=0; terminal < cut_arcs.size(); terminal++)
-        for(int arc=0; arc < cut_arcs[terminal].size(); arc++)
-        {
-            cout << digraph.id(cut_arcs[terminal][arc]) << " ";
-            num_arcs++;
-        }
-    cout << endl << "Number of arcs:" << num_arcs << endl << endl;
-
-    cout << "Multiway_cut: ";
-    int num_edges = 0;
-    for (int terminal=0; terminal < multiway_cut.size(); terminal++)
-        for(int tuple=0; tuple < multiway_cut[terminal].size(); tuple++)
-        {
-            cout << "(" << get<0>(multiway_cut[terminal][tuple]) << ", " << get<1>(multiway_cut[terminal][tuple]) << ") ";
-            num_edges++;
-        }
-        cout << endl << "Number of edges:" << num_edges << endl << endl;
-
-    cout << "Cost of multiway cut: " << multiway_cut_cost << endl;
+    cout << "---------" << endl << "Solution: " << endl;
+    printing_solution(digraph, cut_arcs, multiway_cut, multiway_cut_cost);
 
     return 0;
 }

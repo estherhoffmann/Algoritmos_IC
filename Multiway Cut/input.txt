@@ -1,1 +1,1 @@
-grafos/teste_1.txt
+Instâncias/steinb18.txt
