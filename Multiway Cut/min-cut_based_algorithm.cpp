@@ -201,7 +201,7 @@ int get_rid_of_most_expensive_cut(ListDigraph &digraph, ListDigraph::ArcMap<int>
             edge_cost = capacity[findArc(digraph, digraph.nodeFromId((get<0>(multiway_cut[i][j]))-1),
                                             digraph.nodeFromId((get<1>(multiway_cut[i][j])-1)) )];
             multiway_cut_cost += edge_cost;
-            num_edges++;
+            num_edges++
         }
     }
     //cout << endl << endl;
@@ -349,7 +349,7 @@ int main()
 
     //vector of (vector of tuples) that storages the edges of the cut; this is a simpler result
     vector< vector <tuple <int, int> > > multiway_cut;
-
+    
     int num_edges = 0;
     int multiway_cut_cost = get_multiway_cut(digraph, capacity, terminals, multiway_cut, num_edges);
 

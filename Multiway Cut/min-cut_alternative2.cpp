@@ -16,7 +16,7 @@ using namespace std;
 using namespace lemon;
 
 int DEBUG = 0;
-int DEBUG_RESULT = true;
+int DEBUG_RESULT = false;
 
 //these "printing_" functions are just to understand what is going on
 void printing_graph(ListDigraph &digraph, ListDigraph::ArcMap<int> &capacity, vector<int> &terminals)
@@ -192,7 +192,7 @@ void update_multiwaycut_and_arcs(ListDigraph &digraph, ListDigraph::ArcMap<int> 
                         if((find(multiway_cut[i].begin(), multiway_cut[i].end(), aux_tuple) != multiway_cut[i].end())
                             || (find(multiway_cut[i].begin(), multiway_cut[i].end(), reverse_aux_tuple) != multiway_cut[i].end()))
                             {
-                                cout << "hey";
+                                cout << "this should not have happened x.x";
                                 not_already_in_cut = false;
                             }
 
@@ -259,13 +259,14 @@ int get_multiway_cut(ListDigraph &digraph, ListDigraph::ArcMap<int> &capacity, v
            printing_mincut_values(min_cut_values);
            cout << endl;
        }
-
+       /*
        ListDigraph::Node curr_node = digraph.nodeFromId(terminals[current_term]);
        for(ListDigraph::OutArcIt a(digraph, curr_node); a != INVALID; ++a)
        {
            digraph.erase(a);
        }
        digraph.erase(curr_node);
+       */
    }
 
    if (DEBUG >= 4)

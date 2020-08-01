@@ -59,11 +59,12 @@ def main():
 
     graph_file_name = input()
     numof_v, numof_e, edges, terminals, numof_cut_edges, multiway_cut_cost, cut_edges = read_files(graph_file_name)
-    print(cut_edges)
-    print(terminals)
+    #print(cut_edges)
+    #print(terminals)
     graph = create_graph(numof_v, numof_e, edges, terminals, cut_edges)
 
-    pos = nx.spectral_layout(graph, weight = 'weight')
+    pos = nx.bipartite_layout(graph, terminals)
+    #pos = nx.random_layout(graph)
 
     node_colors = []
     for i in range(0, numof_v):
@@ -72,11 +73,11 @@ def main():
         node_colors[node] = '#80a167'
 
     edge_labels = nx.get_edge_attributes(graph,'weight')
-    plt.figure(figsize=(12,12))
+    plt.figure(0, figsize=(12,12))
     nx.draw_networkx(graph, pos, with_labels=True, edge_color = '#253037')
     nx.draw_networkx_nodes(graph, pos, nodelist=terminals, node_color= '#80a167')
     nx.draw_networkx_edges(graph, pos, edgelist=cut_edges, edge_color='#c16124')
-    nx.draw_networkx_edge_labels(graph, pos, edge_labels=edge_labels)
+    #nx.draw_networkx_edge_labels(graph, pos, edge_labels=edge_labels)
 
     '''
     nx.draw_networkx_nodes(graph,pos,
@@ -93,7 +94,7 @@ def main():
     plt.savefig(img_path, dpi=300)
     plt.show()
 
-    graph.toagraph()
+    #graph.toagraph()
 
 if __name__ == "__main__":
     main();
