@@ -5,7 +5,7 @@
 #include <tuple>
 #include <limits>
 #include <iomanip>
-//#include <time.h>
+#include <chrono>
 
 #include <lemon/list_graph.h>
 #include <lemon/concepts/maps.h>
@@ -17,6 +17,15 @@ using namespace lemon;
 
 int DEBUG = 0;
 int DEBUG_RESULT = false;
+
+class Node
+{
+    public:
+    //edge (u,v)
+    int u;
+    int v;
+    Node* next;
+};
 
 //these "printing_" functions are just to understand what is going on
 void printing_graph(ListDigraph &digraph, ListDigraph::ArcMap<int> &capacity, vector<int> &terminals)
@@ -74,37 +83,50 @@ void printing_multiway_vector(vector<vector<tuple <int,int> > > &multiway_cut)
 }
 
 
+void printing_cut_list(Node*& list)
+{
+    Node *aux_p, *aux_q;
+    cout << "Cut list:" << endl;
+    aux_q = list;
+    while(aux_q != NULL)
+    {
+        cout << "(" << aux_q->u << ", " << aux_q->v << "), ";
+        aux_p = aux_q;
+        aux_q = aux_p->next;
+    }
+    cout << "end of cut list" << endl;
+}
+
 void printing_solution(ListDigraph &digraph,
                             vector<vector<tuple <int,int> > > &multiway_cut,
+                            Node* cut_list,
                             int num_edges, int multiway_cut_cost)
 {
     printing_multiway_vector(multiway_cut);
+    printing_cut_list(cut_list);
     cout << "Number of edges: " << num_edges << endl;
     cout << "Cost of multiway cut: " << multiway_cut_cost << endl;
 }
 
-int save_result_in_file(string file_name, vector<vector<tuple <int,int> > > &multiway_cut,
-                        int num_edges, int multiway_cut_cost)
+int save_result_in_file(string file_name, Node *cut_list, int multiway_cut_cost, double exec_time)
 {
-    string full_path = "Solutions/" + file_name.substr(0, file_name.find(".")) + "_alternative1.sol";
+    string full_path = "Solutions/Alternative 1/" + file_name.substr(0, file_name.find(".")) + ".sol";
     cout << full_path << endl;
     ofstream sol_file(full_path);
 
-    sol_file << multiway_cut_cost << " " << num_edges << endl;
+    sol_file << "custo " << multiway_cut_cost << endl;
+    sol_file << "tempo " << fixed << setprecision(2) << exec_time << endl;
 
-    int teste = 0;
-    for(int i=0; i < multiway_cut.size(); i++)
+    Node *aux_p, *aux_q;
+    aux_q = cut_list;
+    while(aux_q != NULL)
     {
-        for(int j=0; j < multiway_cut[i].size(); j++)
-        {
-            sol_file << get<0>(multiway_cut[i][j]) << " " << get<1>(multiway_cut[i][j]) << endl;
-            teste++;
-        }
+        sol_file << aux_q->u << " " << aux_q->v << endl;
+        aux_p = aux_q;
+        aux_q = aux_p->next;
     }
-    sol_file.close();
 
-    if (teste != num_edges)
-        cout << "epa";
+    sol_file.close();
     return 0;
 }
 
@@ -151,14 +173,89 @@ void read_graph(ListDigraph &digraph, string file_name,
     graph_file.close();
 }
 
+// searches new_edge in list. If found, does nothing
+// if not found, insert in numerical order for  u atrr
+bool insert_edge(Node *&list, tuple<int,int> &new_edge)
+{
+    Node *new_node = new Node();
+    //ordening new node by attribute u
+    if (get<0>(new_edge) < get<1>(new_edge))
+    {
+        new_node->u = get<0>(new_edge);
+        new_node->v = get<1>(new_edge);
+    }
+    else
+    {
+        new_node->u = get<1>(new_edge);
+        new_node->v = get<0>(new_edge);
+    }
+
+    // if list is empty
+    if (list == nullptr)
+    {
+        new_node->next = NULL;
+        list = new_node;
+        return true;
+    }
+
+    // else
+    Node *aux_curr, *aux_prev;
+    aux_curr = list;
+    aux_prev = nullptr;
+
+    while((aux_curr != nullptr) && ((aux_curr->u < new_node->u) || ((aux_curr->u == new_node->u) && (aux_curr->v < new_node->v))))
+    {
+        aux_prev = aux_curr;
+        aux_curr = aux_prev->next;
+    }
+
+    //edge already in the list
+    if(aux_curr != nullptr && aux_curr->u == new_node->u && aux_curr->v == new_node->v)
+        return false;
+
+    //we want to insert in the fist position
+    if(aux_prev == nullptr)
+    {
+        new_node->next = aux_curr;
+        list = new_node;
+        return true;
+    }
+
+    //we want to insert or between 2 nodes, or at the end
+    new_node->next = aux_curr;
+    aux_prev->next = new_node;
+    return true;
+}
+
+int calculate_cost_and_get_list(ListDigraph &digraph, ListDigraph::ArcMap<int> &capacity,
+                                vector<vector<tuple <int,int> > > &multiway_cut,
+                                Node*& cut_list, int &num_edges)
+{
+    int edge_cost, multiway_cut_cost = 0;
+    num_edges = 0;
+
+    for(int i=0; i < multiway_cut.size(); i++)
+    {
+        for(int j=0; j < multiway_cut[i].size(); j++)
+        {
+            if(insert_edge(cut_list, multiway_cut[i][j]))
+            {
+                edge_cost = capacity[findArc(digraph, digraph.nodeFromId((get<0>(multiway_cut[i][j]))-1),
+                                                digraph.nodeFromId((get<1>(multiway_cut[i][j])-1)) )];
+                multiway_cut_cost += edge_cost;
+                num_edges++;
+            }
+        }
+    }
+    return multiway_cut_cost;
+}
 
 //update the vector of Arcs and edges of the cut, using the mincut NodeMap
-void update_multiwaycut_and_arcs(ListDigraph &digraph, ListDigraph::ArcMap<int> &capacity,
-                    ListDigraph::NodeMap<bool> &mincut,
-                    vector<vector<tuple <int, int>>> &multiway_cut, int &multiway_cut_cost, int &num_edges)
+void update_multiwaycut_and_arcs(ListDigraph &digraph, ListDigraph::NodeMap<bool> &mincut,
+                    vector<vector<tuple <int, int>>> &multiway_cut)
 {
     ListDigraph::Node target_node;
-    tuple <int, int> aux_tuple, reverse_aux_tuple;
+    tuple <int, int> aux_tuple;
     vector<tuple<int, int>> aux_tuple_vector;
     bool not_already_in_cut = true;
 
@@ -173,33 +270,16 @@ void update_multiwaycut_and_arcs(ListDigraph &digraph, ListDigraph::ArcMap<int> 
         {
             for(ListDigraph::OutArcIt a(digraph, node_in_cut); a != INVALID; ++a)
             {
-                not_already_in_cut = true;
                 target_node = digraph.target(a);
                 if(mincut[target_node] == false)
                 {
                     aux_tuple = make_tuple(digraph.id(node_in_cut)+1, digraph.id(target_node)+1);
-                    reverse_aux_tuple = make_tuple(get<1>(aux_tuple), get<0>(aux_tuple));
-
+                    aux_tuple_vector.push_back(aux_tuple);
                     if (DEBUG >= 3)
                     {
                         cout << "(" << get<0>(aux_tuple)
                             << ", " << get<1>(aux_tuple) << ")" <<  endl;
                     }
-
-                    //if tuple or reverse tuple are already in the multiway_cut
-                    for(int i=0; i < multiway_cut.size(); i++)
-                        if((find(multiway_cut[i].begin(), multiway_cut[i].end(), aux_tuple) != multiway_cut[i].end())
-                            || (find(multiway_cut[i].begin(), multiway_cut[i].end(), reverse_aux_tuple) != multiway_cut[i].end()))
-                                not_already_in_cut = false;
-
-                    if(not_already_in_cut)
-                    {
-                        aux_tuple_vector.push_back(aux_tuple);
-                        multiway_cut_cost += capacity[findArc(digraph, digraph.nodeFromId((get<0>(aux_tuple)-1)),
-                                                        digraph.nodeFromId((get<1>(aux_tuple)-1)) )];
-                        num_edges++;
-                    }
-
                 }
             }
         }
@@ -209,7 +289,7 @@ void update_multiwaycut_and_arcs(ListDigraph &digraph, ListDigraph::ArcMap<int> 
 
 
 int get_multiway_cut(ListDigraph &digraph, ListDigraph::ArcMap<int> &capacity, vector<int> &terminals,
-                   vector<vector<tuple <int, int>>> &multiway_cut, int &num_edges)
+                   vector<vector<tuple <int, int>>> &multiway_cut)
 {
    ListDigraph::NodeMap<bool> mincut(digraph);
    vector<int> min_cut_values; //keeps the max flow value of each iteration
@@ -245,7 +325,7 @@ int get_multiway_cut(ListDigraph &digraph, ListDigraph::ArcMap<int> &capacity, v
        preflow.minCutMap(mincut);
        min_cut_values.push_back(preflow.flowValue());
 
-       update_multiwaycut_and_arcs(digraph, capacity, mincut, multiway_cut, multiway_cut_cost, num_edges);
+       update_multiwaycut_and_arcs(digraph, mincut, multiway_cut);
 
        if (DEBUG >= 2)
        {
@@ -276,8 +356,8 @@ int get_multiway_cut(ListDigraph &digraph, ListDigraph::ArcMap<int> &capacity, v
 
 int main()
 {
-    time_t start, end;
-    time(&start);
+    auto start = chrono::steady_clock::now();
+
     ListDigraph digraph;
     ListDigraph::ArcMap<int> capacity(digraph);
     vector<int> terminals;
@@ -293,31 +373,27 @@ int main()
 
     //vector of (vector of tuples) that storages the edges of the cut; this is a simpler result
     vector< vector <tuple <int, int> > > multiway_cut;
+    get_multiway_cut(digraph, capacity, terminals, multiway_cut);
 
+    Node* cut_list = NULL;
     int num_edges = 0;
-    int multiway_cut_cost = get_multiway_cut(digraph, capacity, terminals, multiway_cut, num_edges);
-
-    if (DEBUG >= 1)
-    {
-        cout << endl << "Resulting graph: " << endl;
-        printing_graph(digraph, capacity, terminals);
-    }
+    int multiway_cut_cost = calculate_cost_and_get_list(digraph, capacity, multiway_cut, cut_list, num_edges);
 
     if (DEBUG_RESULT == true)
     {
         cout << "---------" << endl << "Solution: " << endl;
-        printing_solution(digraph, multiway_cut, num_edges, multiway_cut_cost);
+        printing_solution(digraph, multiway_cut, cut_list, num_edges, multiway_cut_cost);
         cout << endl;
     }
 
-
-    save_result_in_file(file_name, multiway_cut, num_edges, multiway_cut_cost);
-
-    time(&end);
     // Calculating total time taken by the program.
-    double time_taken = double(end - start);
+    auto end = chrono::steady_clock::now();
+    chrono::duration<double> diff = end - start;
+    double time_taken = diff.count();
     cout << "Time taken by program is : " << fixed
-         << time_taken << setprecision(5);
+         << fixed << setprecision(2) << time_taken;
     cout << " sec " << endl;
+
+    save_result_in_file(file_name, cut_list, multiway_cut_cost, time_taken);
     return 0;
 }

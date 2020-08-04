@@ -17,9 +17,8 @@ using namespace lemon;
 
 int DEBUG = 0;
 int DEBUG_EXPENSIVE_CUT = false;
-int DEBUG_RESULT = true;
+int DEBUG_RESULT = false;
 
-// link list node
 class Node
 {
     public:
@@ -47,23 +46,11 @@ void printing_graph(ListDigraph &digraph, ListDigraph::ArcMap<int> &capacity, ve
     cout << endl;
 }
 
-
 void printing_mincut_values(vector<int> &min_cut_values)
 {
     cout << "Min Cut Values: ";
     for(int i=0; i < min_cut_values.size(); i++)
         cout << min_cut_values[i] << " ";
-    cout << endl;
-}
-
-
-void printing_nodes_reachable_from_source_mincut(ListDigraph &digraph, ListDigraph::NodeMap<bool> &mincut)
-{
-    cout << "Nodes reachable from source in the mincut:";
-    for (ListDigraph::NodeIt n(digraph); n != INVALID; ++n)
-        if(mincut[n] == true)
-            cout << " " << (digraph.id(n))+1;
-
     cout << endl;
 }
 
@@ -89,11 +76,11 @@ void printing_cut_list(Node*& list)
     aux_q = list;
     while(aux_q != NULL)
     {
-        cout << "(" << aux_q->u << ", " << aux_q->v << ")" << endl;
+        cout << "(" << aux_q->u << ", " << aux_q->v << "), ";
         aux_p = aux_q;
         aux_q = aux_p->next;
     }
-        cout << "End of cut list" << endl;
+    cout << "end of cut list" << endl;
 }
 
 void printing_solution(ListDigraph &digraph,
@@ -109,7 +96,7 @@ void printing_solution(ListDigraph &digraph,
 
 int save_result_in_file(string file_name, Node *cut_list, int multiway_cut_cost, double exec_time)
 {
-    string full_path = "Solutions/" + file_name.substr(0, file_name.find(".")) + ".sol";
+    string full_path = "Solutions/Original algorithm/" + file_name.substr(0, file_name.find(".")) + ".sol";
     cout << full_path << endl;
     ofstream sol_file(full_path);
 
@@ -130,7 +117,7 @@ int save_result_in_file(string file_name, Node *cut_list, int multiway_cut_cost,
 }
 
 // reads graph file, creating a digraph
-void read_graph(ListDigraph &digraph, string file_name,
+bool read_graph(ListDigraph &digraph, string file_name,
                 ListDigraph::ArcMap<int> &capacity, vector<int> &terminals)
 {
     int numof_e, numof_v, source, target, weight, qnt_terminals;
@@ -138,9 +125,13 @@ void read_graph(ListDigraph &digraph, string file_name,
 
     //specifying the full path
     string full_path = "Instances/" + file_name;
+
     // open a file in read mode
     ifstream graph_file;
     graph_file.open(full_path);
+
+    if(graph_file.fail())
+        return false;
 
     graph_file >> numof_v;
     graph_file >> numof_e;
@@ -171,6 +162,7 @@ void read_graph(ListDigraph &digraph, string file_name,
     }
 
     graph_file.close();
+    return true;
 }
 
 // searches new_edge in list. If found, does nothing
@@ -248,15 +240,13 @@ int calculate_cost_and_get_list(ListDigraph &digraph, ListDigraph::ArcMap<int> &
                                 Node*& cut_list, int &num_edges)
 {
     int edge_cost, multiway_cut_cost = 0;
-    tuple <int, int> aux_tuple;
     num_edges = 0;
 
     for(int i=0; i < multiway_cut.size(); i++)
     {
         for(int j=0; j < multiway_cut[i].size(); j++)
         {
-            aux_tuple = multiway_cut[i][j];
-            if(insert_edge(cut_list, aux_tuple))
+            if(insert_edge(cut_list, multiway_cut[i][j]))
             {
                 edge_cost = capacity[findArc(digraph, digraph.nodeFromId((get<0>(multiway_cut[i][j]))-1),
                                                 digraph.nodeFromId((get<1>(multiway_cut[i][j])-1)) )];
@@ -367,7 +357,6 @@ void get_multiway_cut(ListDigraph &digraph, ListDigraph::ArcMap<int> &capacity, 
 
        if (DEBUG >= 2)
        {
-           //printing_nodes_reachable_from_source_mincut(digraph, mincut);
            cout << endl;
            printing_mincut_values(min_cut_values);
            cout << endl;
@@ -394,16 +383,27 @@ void get_multiway_cut(ListDigraph &digraph, ListDigraph::ArcMap<int> &capacity, 
 }
 
 
-int main()
+int main(int argc, char** argv)
 {
+    if(argc < 2)
+    {
+        cout << "This code requires a instance input. ";
+        cout << "Please select one from the instances directory. (i.e. ./multiway1 steinb1.txt)";
+        return 0;
+    }
+
     auto start = chrono::steady_clock::now();
+
     ListDigraph digraph;
     ListDigraph::ArcMap<int> capacity(digraph);
     vector<int> terminals;
 
-    string file_name;
-    cin >> file_name;
-    read_graph(digraph, file_name, capacity, terminals);
+    string file_name = argv[1];
+    if(!read_graph(digraph, file_name, capacity, terminals))
+    {
+        cout << "Could not open the file." << endl;
+        return 0;
+    }
 
     if (DEBUG >= 1)
     {
