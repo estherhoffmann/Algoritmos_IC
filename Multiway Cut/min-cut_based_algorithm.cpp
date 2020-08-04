@@ -5,7 +5,7 @@
 #include <tuple>
 #include <limits>
 #include <iomanip>
-//#include <time.h>
+#include <chrono>
 
 #include <lemon/list_graph.h>
 #include <lemon/concepts/maps.h>
@@ -114,7 +114,7 @@ int save_result_in_file(string file_name, Node *cut_list, int multiway_cut_cost,
     ofstream sol_file(full_path);
 
     sol_file << "custo " << multiway_cut_cost << endl;
-    sol_file << "tempo " << exec_time << setprecision(2) << endl;
+    sol_file << "tempo " << fixed << setprecision(2) << exec_time << endl;
 
     Node *aux_p, *aux_q;
     aux_q = cut_list;
@@ -195,8 +195,6 @@ bool insert_edge(Node *&list, tuple<int,int> &new_edge)
     {
         new_node->next = NULL;
         list = new_node;
-        cout << "lista: (" << list->u << ", " << list->v << ")" << endl;
-        cout << "fim" << endl;
         return true;
     }
 
@@ -285,7 +283,7 @@ void get_rid_of_most_expensive_cut(ListDigraph &digraph,
             << " with value " << min_cut_values[most_exp_terminal_cut]<< endl;
     }
 
-    //multiway_cut.erase(multiway_cut.begin()+most_exp_terminal_cut);
+    multiway_cut.erase(multiway_cut.begin()+most_exp_terminal_cut);
 
     if (DEBUG_EXPENSIVE_CUT == 1)
         printing_multiway_vector(multiway_cut);
@@ -398,8 +396,7 @@ void get_multiway_cut(ListDigraph &digraph, ListDigraph::ArcMap<int> &capacity, 
 
 int main()
 {
-    time_t start, end;
-    time(&start);
+    auto start = chrono::steady_clock::now();
     ListDigraph digraph;
     ListDigraph::ArcMap<int> capacity(digraph);
     vector<int> terminals;
@@ -429,11 +426,12 @@ int main()
         cout << endl;
     }
 
-    time(&end);
     // Calculating total time taken by the program.
-    double time_taken = double(end - start);
+    auto end = chrono::steady_clock::now();
+    chrono::duration<double> diff = end - start;
+    double time_taken = diff.count();
     cout << "Time taken by program is : " << fixed
-         << time_taken << setprecision(5);
+         << fixed << setprecision(2) << time_taken;
     cout << " sec " << endl;
 
     save_result_in_file(file_name, cut_list, multiway_cut_cost, time_taken);
