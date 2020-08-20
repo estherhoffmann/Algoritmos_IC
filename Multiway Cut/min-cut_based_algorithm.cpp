@@ -83,17 +83,6 @@ void printing_cut_list(Node*& list)
     cout << "end of cut list" << endl;
 }
 
-void printing_solution(ListDigraph &digraph,
-                            vector<vector<tuple <int,int> > > &multiway_cut,
-                            Node* cut_list,
-                            int num_edges, int multiway_cut_cost)
-{
-    printing_multiway_vector(multiway_cut);
-    printing_cut_list(cut_list);
-    cout << "Number of edges: " << num_edges << endl;
-    cout << "Cost of multiway cut: " << multiway_cut_cost << endl;
-}
-
 int save_result_in_file(string file_name, Node *cut_list, int multiway_cut_cost, double exec_time)
 {
     string full_path = "Solutions/Original algorithm/" + file_name.substr(0, file_name.find(".")) + ".sol";
@@ -166,7 +155,7 @@ bool read_graph(ListDigraph &digraph, string file_name,
 }
 
 // searches new_edge in list. If found, does nothing
-// if not found, insert in numerical order for  u atrr
+// if not found, insert in numerical order
 bool insert_edge(Node *&list, tuple<int,int> &new_edge)
 {
     Node *new_node = new Node();
@@ -239,7 +228,7 @@ int calculate_cost_and_get_list(ListDigraph &digraph, ListDigraph::ArcMap<int> &
                                 vector<vector<tuple <int,int> > > &multiway_cut,
                                 Node*& cut_list, int &num_edges)
 {
-    int edge_cost, multiway_cut_cost = 0;
+    int multiway_cut_cost = 0;
     num_edges = 0;
 
     for(int i=0; i < multiway_cut.size(); i++)
@@ -248,9 +237,8 @@ int calculate_cost_and_get_list(ListDigraph &digraph, ListDigraph::ArcMap<int> &
         {
             if(insert_edge(cut_list, multiway_cut[i][j]))
             {
-                edge_cost = capacity[findArc(digraph, digraph.nodeFromId((get<0>(multiway_cut[i][j]))-1),
+                multiway_cut_cost += capacity[findArc(digraph, digraph.nodeFromId((get<0>(multiway_cut[i][j]))-1),
                                                 digraph.nodeFromId((get<1>(multiway_cut[i][j])-1)) )];
-                multiway_cut_cost += edge_cost;
                 num_edges++;
             }
         }
@@ -286,12 +274,10 @@ void update_multiwaycut_and_arcs(ListDigraph &digraph, ListDigraph::NodeMap<bool
     ListDigraph::Node target_node;
     tuple <int, int> aux_tuple;
     vector<tuple<int, int>> aux_tuple_vector;
-    bool not_already_in_cut = true;
 
     if (DEBUG >= 3)
-    {
         cout << "Arcs from mincut of this iteration:" << endl;
-    }
+
 
     for(ListDigraph::NodeIt node_in_cut(digraph); node_in_cut != INVALID; ++node_in_cut)
     {
@@ -410,10 +396,11 @@ int main(int argc, char** argv)
         printing_graph(digraph, capacity, terminals);
     }
 
-    //vector of (vector of tuples) that storages the edges of the cut; this is a simpler result
+    //vector of (vector of tuples) that storages the edges of the cut on each iteration
     vector< vector <tuple <int, int> > > multiway_cut;
     get_multiway_cut(digraph, capacity, terminals, multiway_cut);
 
+    //linked list with cut edges in numerical order and with no repetition
     Node* cut_list = NULL;
     int num_edges = 0;
     int multiway_cut_cost = calculate_cost_and_get_list(digraph, capacity, multiway_cut, cut_list, num_edges);
@@ -422,7 +409,10 @@ int main(int argc, char** argv)
     if (DEBUG_RESULT == true)
     {
         cout << "---------" << endl << "Solution: " << endl;
-        printing_solution(digraph, multiway_cut, cut_list, num_edges, multiway_cut_cost);
+        printing_multiway_vector(multiway_cut);
+        printing_cut_list(cut_list);
+        cout << "Number of edges: " << num_edges << endl;
+        cout << "Cost of multiway cut: " << multiway_cut_cost << endl;
         cout << endl;
     }
 

@@ -97,17 +97,6 @@ void printing_cut_list(Node*& list)
     cout << "end of cut list" << endl;
 }
 
-void printing_solution(ListDigraph &digraph,
-                            vector<vector<tuple <int,int> > > &multiway_cut,
-                            Node* cut_list,
-                            int num_edges, int multiway_cut_cost)
-{
-    printing_multiway_vector(multiway_cut);
-    printing_cut_list(cut_list);
-    cout << "Number of edges: " << num_edges << endl;
-    cout << "Cost of multiway cut: " << multiway_cut_cost << endl;
-}
-
 int save_result_in_file(string file_name, Node *cut_list, int multiway_cut_cost, double exec_time)
 {
     string full_path = "Solutions/Alternative 1/" + file_name.substr(0, file_name.find(".")) + ".sol";
@@ -130,7 +119,8 @@ int save_result_in_file(string file_name, Node *cut_list, int multiway_cut_cost,
     return 0;
 }
 
-void read_graph(ListDigraph &digraph, string file_name,
+// reads graph file, creating a digraph
+bool read_graph(ListDigraph &digraph, string file_name,
                 ListDigraph::ArcMap<int> &capacity, vector<int> &terminals)
 {
     int numof_e, numof_v, source, target, weight, qnt_terminals;
@@ -138,9 +128,13 @@ void read_graph(ListDigraph &digraph, string file_name,
 
     //specifying the full path
     string full_path = "Instances/" + file_name;
+
     // open a file in read mode
     ifstream graph_file;
     graph_file.open(full_path);
+
+    if(graph_file.fail())
+        return false;
 
     graph_file >> numof_v;
     graph_file >> numof_e;
@@ -171,6 +165,7 @@ void read_graph(ListDigraph &digraph, string file_name,
     }
 
     graph_file.close();
+    return true;
 }
 
 // searches new_edge in list. If found, does nothing
@@ -231,7 +226,7 @@ int calculate_cost_and_get_list(ListDigraph &digraph, ListDigraph::ArcMap<int> &
                                 vector<vector<tuple <int,int> > > &multiway_cut,
                                 Node*& cut_list, int &num_edges)
 {
-    int edge_cost, multiway_cut_cost = 0;
+    int multiway_cut_cost = 0;
     num_edges = 0;
 
     for(int i=0; i < multiway_cut.size(); i++)
@@ -240,9 +235,8 @@ int calculate_cost_and_get_list(ListDigraph &digraph, ListDigraph::ArcMap<int> &
         {
             if(insert_edge(cut_list, multiway_cut[i][j]))
             {
-                edge_cost = capacity[findArc(digraph, digraph.nodeFromId((get<0>(multiway_cut[i][j]))-1),
+                multiway_cut_cost += capacity[findArc(digraph, digraph.nodeFromId((get<0>(multiway_cut[i][j]))-1),
                                                 digraph.nodeFromId((get<1>(multiway_cut[i][j])-1)) )];
-                multiway_cut_cost += edge_cost;
                 num_edges++;
             }
         }
@@ -257,7 +251,6 @@ void update_multiwaycut_and_arcs(ListDigraph &digraph, ListDigraph::NodeMap<bool
     ListDigraph::Node target_node;
     tuple <int, int> aux_tuple;
     vector<tuple<int, int>> aux_tuple_vector;
-    bool not_already_in_cut = true;
 
     if (DEBUG >= 3)
     {
@@ -334,15 +327,13 @@ int get_multiway_cut(ListDigraph &digraph, ListDigraph::ArcMap<int> &capacity, v
            printing_mincut_values(min_cut_values);
            cout << endl;
        }
-       /*
-       ListDigraph::Node curr_node = digraph.nodeFromId(terminals[current_term]);
-       for(ListDigraph::OutArcIt a(digraph, curr_node); a != INVALID; ++a)
-       {
-           digraph.erase(a);
-       }
-       digraph.erase(curr_node);
-       */
+
+       /* in this alternative, we just dont reconect the current_term with the artificial_sink
+            because it is aready "disconnected" from the other terminals */
    }
+
+   /* we also dont need to get rid of the expensivest cut because we will not compute a cut for the
+        last terminal, since there will be no terminal with arcs to artificial_sink */
 
    if (DEBUG >= 4)
    {
@@ -354,17 +345,27 @@ int get_multiway_cut(ListDigraph &digraph, ListDigraph::ArcMap<int> &capacity, v
 }
 
 
-int main()
+int main(int argc, char** argv)
 {
+    if(argc < 2)
+    {
+        cout << "This code requires a instance input. ";
+        cout << "Please select one from the instances directory. (i.e. ./multiway1 steinb1.txt)";
+        return 0;
+    }
+
     auto start = chrono::steady_clock::now();
 
     ListDigraph digraph;
     ListDigraph::ArcMap<int> capacity(digraph);
     vector<int> terminals;
 
-    string file_name;
-    cin >> file_name;
-    read_graph(digraph, file_name, capacity, terminals);
+    string file_name = argv[1];
+    if(!read_graph(digraph, file_name, capacity, terminals))
+    {
+        cout << "Could not open the file." << endl;
+        return 0;
+    }
 
     if (DEBUG >= 1)
     {
@@ -382,7 +383,10 @@ int main()
     if (DEBUG_RESULT == true)
     {
         cout << "---------" << endl << "Solution: " << endl;
-        printing_solution(digraph, multiway_cut, cut_list, num_edges, multiway_cut_cost);
+        printing_multiway_vector(multiway_cut);
+        printing_cut_list(cut_list);
+        cout << "Number of edges: " << num_edges << endl;
+        cout << "Cost of multiway cut: " << multiway_cut_cost << endl;
         cout << endl;
     }
 
