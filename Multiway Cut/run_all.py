@@ -64,7 +64,7 @@ def save_table_file(current_execution):
         table_file.write("%s %d %d %d %d %.2f\n" %(file_name.split('.')[0], num_v, num_e, num_t, cost, exec_time))
 
     table_file.close()
-    print('Done writing ' + table_file_path + '.')
+    print('Done writing ' + table_file_path + '\n')
 
 def run_instances(current_execution):
     file_list = os.listdir('Instances/')
@@ -74,13 +74,13 @@ def run_instances(current_execution):
     for file_name in file_list:
         if DEBUG >= 1:
             print('Executing multiway' + str(current_execution+1) +' with ' + file_name)
-        os.system('./multiway1 '  + file_name)
+        os.system('./multiway' + str(current_execution+1) + " "  + file_name)
         instance_cnt += 1
         if DEBUG >= 1:
             print()
 
     if DEBUG >= 1:
-        print('Done executing ./multiway' + str(current_execution+1) +  'with ' + str(instance_cnt) + ' instances')
+        print('Done executing ./multiway' + str(current_execution+1) +  ' with ' + str(instance_cnt) + ' instances\n')
 
 def main():
     import sys
