@@ -36,7 +36,6 @@ void printing_graph(ListDigraph &digraph, ListDigraph::ArcMap<int> &capacity, ve
     cout << endl;
 }
 
-
 void printing_mincut_values(vector<int> &min_cut_values)
 {
     cout << "Min Cut Values: ";
@@ -44,7 +43,6 @@ void printing_mincut_values(vector<int> &min_cut_values)
         cout << min_cut_values[i] << " ";
     cout << endl;
 }
-
 
 void printing_nodes_reachable_from_source_mincut(ListDigraph &digraph, ListDigraph::NodeMap<bool> &mincut)
 {
@@ -73,7 +71,6 @@ void printing_multiway_vector(vector<vector<tuple <int,int> > > &multiway_cut)
     cout << endl;
 }
 
-
 void printing_solution(ListDigraph &digraph,
                             vector<vector<tuple <int,int> > > &multiway_cut,
                             int num_edges, int multiway_cut_cost)
@@ -86,7 +83,7 @@ void printing_solution(ListDigraph &digraph,
 int save_result_in_file(string file_name, vector<vector<tuple <int,int> > > &multiway_cut,
                         int num_edges, int multiway_cut_cost)
 {
-    string full_path = "Solutions/" + file_name.substr(0, file_name.find(".")) + "_alternative2.sol";
+    string full_path = "Solutions/Alternative 2/" + file_name.substr(0, file_name.find(".")) + ".sol";
     cout << full_path << endl;
     ofstream sol_file(full_path);
 
