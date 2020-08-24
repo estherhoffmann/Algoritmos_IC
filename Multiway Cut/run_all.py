@@ -6,7 +6,7 @@ DEBUG = 1
 def print_requirement():
     print('This script requires two arguments.\n')
     print('The first argument specify what you want to do:')
-    print('0: just run the algoritm\n1: just build the table file\n2: both.\n')
+    print('0: just run the algorithm\n1: just build the table file\n2: both.\n')
     print('The second argument specify which algorithm/sols you want to use:')
     print('0: original min cut based algorithm\n1: modified 1 (./multiway2)\n2: modified 2 (./multiway3)\n3: all of them')
 

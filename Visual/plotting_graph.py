@@ -20,20 +20,18 @@ def read_files(graph_file_name):
     terminals = lines[numof_e+2].split()
     terminals = list(map(int, terminals))
 
-    full_path_solution = "../Multiway Cut/Solutions/"+graph_file_name.split(".")[0] +".sol"
+    full_path_solution = "../Multiway Cut/Solutions/Original algorithm/"+graph_file_name.split(".")[0] +".sol"
     file = open(full_path_solution, 'r').read()
     lines = file.split('\n')
 
-    parts = lines[0].split()
-    multiway_cut_cost = int(parts[0])
-    numof_cut_edges = int(parts[1])
+    multiway_cut_cost = int(lines[0].split()[1])
 
     cut_edges = []
-    for i in range(1, numof_cut_edges+1):
+    for i in range(2, len(lines)-1):
         parts = lines[i].split()
         cut_edges.append((int(parts[0]), int(parts[1])))
 
-    return numof_v, numof_e, edges, terminals, numof_cut_edges, multiway_cut_cost, cut_edges
+    return numof_v, numof_e, edges, terminals, len(cut_edges), multiway_cut_cost, cut_edges
 
 def create_graph(numof_v, numof_e, edges, terminals, cut_edges):
     graph = nx.Graph()
@@ -41,6 +39,9 @@ def create_graph(numof_v, numof_e, edges, terminals, cut_edges):
     graph.add_nodes_from([1, numof_v])
     for (u, v, w) in edges:
         graph.add_edge(u, v, weight = w)
+
+    for (u, v) in cut_edges:
+        graph.remove_edge(u, v)
 
     '''
     for node in terminals:
@@ -63,8 +64,8 @@ def main():
     #print(terminals)
     graph = create_graph(numof_v, numof_e, edges, terminals, cut_edges)
 
-    pos = nx.bipartite_layout(graph, terminals)
-    #pos = nx.random_layout(graph)
+    #pos = nx.bipartite_layout(graph, terminals)
+    pos = nx.spring_layout(graph)
 
     node_colors = []
     for i in range(0, numof_v):
@@ -76,7 +77,7 @@ def main():
     plt.figure(0, figsize=(12,12))
     nx.draw_networkx(graph, pos, with_labels=True, edge_color = '#253037')
     nx.draw_networkx_nodes(graph, pos, nodelist=terminals, node_color= '#80a167')
-    nx.draw_networkx_edges(graph, pos, edgelist=cut_edges, edge_color='#c16124')
+    #nx.draw_networkx_edges(graph, pos, edgelist=cut_edges, edge_color='#c16124')
     #nx.draw_networkx_edge_labels(graph, pos, edge_labels=edge_labels)
 
     '''
