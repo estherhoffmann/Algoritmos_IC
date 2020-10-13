@@ -7,8 +7,8 @@ OBJECTS= SampleDecoder.o
 all: samplecode
 
 samplecode: $(OBJECTS)
-	$(CPP) $(CFLAGS) $(OBJECTS) -o samplecode
-        
+	$(CPP) $(CFLAGS) $(OBJECTS) -o samplecode.cpp
+
 SampleDecoder.o:
 	$(CPP) $(CFLAGS) -c SampleDecoder.cpp
 

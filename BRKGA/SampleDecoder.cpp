@@ -6,6 +6,7 @@
  */
 
 #include "SampleDecoder.h"
+#include <iostream>
 
 SampleDecoder::SampleDecoder() { }
 
