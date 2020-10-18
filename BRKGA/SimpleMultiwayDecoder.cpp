@@ -2,33 +2,39 @@
  * SimpleMultiwayDecoder.cpp
  */
 #include <iostream>
-#include <vector>
 #include <algorithm>
-#include <tuple>
 #include <fstream>
-#include <string>
-#include <map>
 #include "SimpleMultiwayDecoder.h"
 
 using namespace std;
 
 SimpleMultiwayDecoder::SimpleMultiwayDecoder(string file_name)
 {
-    cout << "leu alo?";
-    read_file(file_name);
-    cout << "leu arquivo";
+    cout << "leu?" << endl;
+    bool leu_arquivo = read_file(file_name);
+    if (leu_arquivo)
+        cout << "leu arquivo" << endl;
+    else
+        cout << "nao rolou" << endl;
 }
 
 SimpleMultiwayDecoder::~SimpleMultiwayDecoder() { }
 
-double SimpleMultiwayDecoder::decode(const std::vector< double >& chromosome)
+double SimpleMultiwayDecoder::decode(std::vector< double >& chromosome)
 {
-    // Valor do alelo indica em qual parte está o vértice (0->1/k, 1/k->2/k, ..., (k-1)/k->1)
-    // Cromossomo possui, então, um alelo para cada vértice no grafo, menos pros terminais
+    /*
+     Valor do alelo indica em qual parte está o vértice (0->1/k, 1/k->2/k, ..., (k-1)/k->1)
+     Cromossomo possui, então, um alelo para cada vértice no grafo, menos pros terminais
+
+     Uma observação sobre esse método dos baldes, como tratar o caso
+     que um vértice é associado a um conjunto que ele não tem arestas
+     ligando em vértices do mesmo?
+     a chance é mínima para grafos densos, mas imagino que isso deve ser
+     levado em conta no algoritmo *thinking emoji*
+    */
 
     int cut_cost = 0;
-    // Guarda as arestas do corte, como (u, v, peso)
-    //set<pair<int, int>, int> cut_edges;
+    //set<pair<int, int>, int> ;
     vector<int> vertices_groups;
     vertices_groups.assign(num_of_v, -1);
 
@@ -57,8 +63,10 @@ double SimpleMultiwayDecoder::decode(const std::vector< double >& chromosome)
         if (vertices_groups[itr->first.first] != vertices_groups[itr->first.second])
         {
             cut_cost = cut_cost + itr->second;
+            cut_edges.insert(make_tuple(itr->first.first, itr->first.second, itr->second));
         }
     }
+
 	return (double)cut_cost;
 }
 
@@ -66,10 +74,10 @@ double SimpleMultiwayDecoder::decode(const std::vector< double >& chromosome)
 bool SimpleMultiwayDecoder::read_file(string file_name)
 {
     int source, target, weight;
-    cout << "hey";
     //specifying the full path
-    string full_path = "../Multiway_cut/Instances/" + file_name;
-    cout << "aquiii";
+    string full_path = "../Multiway Cut/Instances/" + file_name;
+
+    cout << "String: " << full_path << endl;
     // open a file in read mode
     ifstream graph_file;
     graph_file.open(full_path);

@@ -14,6 +14,10 @@
 
 #ifndef SIMPLEMULTIWAYDECODER_H
 #define SIMPLEMULTIWAYDECODER_H
+#include <map>
+#include <vector>
+#include <string>
+#include <set>
 
 class SimpleMultiwayDecoder {
 private:
@@ -22,12 +26,13 @@ private:
     int num_of_t;
     std::vector<int> terminals;
     std::map<std::pair<int, int>, int> edges;
+    std::set<std::tuple<int, int, int>> cut_edges;
 
 public:
 	SimpleMultiwayDecoder(std::string);
 	~SimpleMultiwayDecoder();
 
-	double decode(const std::vector< double >&);
+	double decode(std::vector< double >&);
     bool read_file(std::string);
 
     int get_num_of_v();
