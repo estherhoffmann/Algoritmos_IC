@@ -15,31 +15,26 @@
 #ifndef SIMPLEMULTIWAYDECODER_H
 #define SIMPLEMULTIWAYDECODER_H
 
-#include <list>
-#include <vector>
-#include <algorithm>
-
 class SimpleMultiwayDecoder {
-public:
-	SimpleMultiwayDecoder();
-	~SimpleMultiwayDecoder();
-
-	double decode(const std::vector< double >& chromosome) const;
-    bool SimpleMultiwayDecoder::read_file(string file_name);
-
-    int get_num_of_v();
-    int get_num_of_e();
-    int get_qnt_terminals();
-    vector get_terminals();
-    int get_edge_cost(std::pair<int, int> edge);
-
 private:
     int num_of_v;
     int num_of_e;
-    int qnt_terminals;
-    vector terminals;
-    std::map<std::pair<int, int>, int> edges_cost;
+    int num_of_t;
+    std::vector<int> terminals;
+    std::map<std::pair<int, int>, int> edges;
 
+public:
+	SimpleMultiwayDecoder(std::string);
+	~SimpleMultiwayDecoder();
+
+	double decode(const std::vector< double >&);
+    bool read_file(std::string);
+
+    int get_num_of_v();
+    int get_num_of_e();
+    int get_num_of_t();
+    std::vector<int> get_terminals();
+    int get_edge_cost(std::pair<int, int>);
 };
 
 #endif
