@@ -10,7 +10,6 @@ using namespace std;
 
 SimpleMultiwayDecoder::SimpleMultiwayDecoder(string file_name)
 {
-    cout << "leu?" << endl;
     bool leu_arquivo = read_file(file_name);
     if (leu_arquivo)
         cout << "leu arquivo" << endl;
@@ -20,7 +19,7 @@ SimpleMultiwayDecoder::SimpleMultiwayDecoder(string file_name)
 
 SimpleMultiwayDecoder::~SimpleMultiwayDecoder() { }
 
-double SimpleMultiwayDecoder::decode(std::vector< double >& chromosome)
+double SimpleMultiwayDecoder::decode(const vector< double >& chromosome)
 {
     /*
      Valor do alelo indica em qual parte está o vértice (0->1/k, 1/k->2/k, ..., (k-1)/k->1)
@@ -32,7 +31,6 @@ double SimpleMultiwayDecoder::decode(std::vector< double >& chromosome)
      a chance é mínima para grafos densos, mas imagino que isso deve ser
      levado em conta no algoritmo *thinking emoji*
     */
-
     int cut_cost = 0;
     //set<pair<int, int>, int> ;
     vector<int> vertices_groups;
@@ -63,12 +61,12 @@ double SimpleMultiwayDecoder::decode(std::vector< double >& chromosome)
         if (vertices_groups[itr->first.first] != vertices_groups[itr->first.second])
         {
             cut_cost = cut_cost + itr->second;
-            cut_edges.insert(make_tuple(itr->first.first, itr->first.second, itr->second));
         }
     }
 
 	return (double)cut_cost;
 }
+
 
 // reads graph file
 bool SimpleMultiwayDecoder::read_file(string file_name)

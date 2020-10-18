@@ -21,18 +21,22 @@
 
 class SimpleMultiwayDecoder {
 private:
+    /*
+    ListDigraph digraph;
+    ListDigraph::ArcMap<int> capacity(digraph);
+    vector<int> terminals;
+    */
     int num_of_v;
     int num_of_e;
     int num_of_t;
     std::vector<int> terminals;
     std::map<std::pair<int, int>, int> edges;
-    std::set<std::tuple<int, int, int>> cut_edges;
 
 public:
 	SimpleMultiwayDecoder(std::string);
 	~SimpleMultiwayDecoder();
 
-	double decode(std::vector< double >&);
+	double decode(const std::vector< double >&);
     bool read_file(std::string);
 
     int get_num_of_v();

@@ -1,11 +1,11 @@
 # Macros:
 CPP= g++
-CFLAGS= -Wall -g
-OBJECTS= main_aux.o SimpleMultiwayDecoder.o
+CFLAGS= -Wall -g -o
+CODE= main_aux.cpp SimpleMultiwayDecoder.cpp
 
 # Targets:
-all: generateobjs
-	./a.out
+all:
+	$(CPP) $(CFLAGS) alg_teste $(CODE)
 
 linkobjs: generateobjs
 	$(CPP) main_aux.o SimpleMultiwayDecoder.o
