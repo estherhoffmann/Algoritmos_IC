@@ -16,22 +16,10 @@
 using namespace std;
 using namespace lemon;
 
-int TYPE_OF_CUT = 1;
-// 0: cut is a ordered linked list
-// 1: cut is a std::set
-
 int DEBUG = 0;
 int DEBUG_EXPENSIVE_CUT = false;
 int DEBUG_RESULT = false;
 
-class Node
-{
-    public:
-    //edge (u,v)
-    int u;
-    int v;
-    Node* next;
-};
 
 // these "printing_" functions are just to understand what is going on
 void printing_graph(ListDigraph &digraph, ListDigraph::ArcMap<int> &capacity, vector<int> &terminals)
@@ -43,9 +31,9 @@ void printing_graph(ListDigraph &digraph, ListDigraph::ArcMap<int> &capacity, ve
             << "), cost: " << capacity[m] << endl;
     }
 
-    cout << endl << "Number of nodes: " << countNodes(digraph) << endl;
-    cout << "Number of arcs: " << countArcs(digraph) << endl;
-    cout << "Terminals:";
+    cout << endl << "Number of nodes: " << countNodes(digraph) << endl
+         << "Number of arcs: " << countArcs(digraph) << endl
+         << "Terminals:";
     for (auto it = terminals.begin(); it != terminals.end(); ++it)
         cout << ' ' << (*it)+1 ;
     cout << endl;
@@ -74,37 +62,21 @@ void printing_multiway_vector(vector<vector<tuple <int,int> > > &multiway_cut)
     cout << endl;
 }
 
-
-void printing_cut_list(Node*& list)
-{
-    Node *aux_p, *aux_q;
-    cout << "Cut list:" << endl;
-    aux_q = list;
-    while(aux_q != NULL)
-    {
-        cout << "(" << aux_q->u << ", " << aux_q->v << "), ";
-        aux_p = aux_q;
-        aux_q = aux_p->next;
-    }
-    cout << "end of cut list" << endl;
-}
-
-
-void printing_cut_list_set(set<pair<int, int>>& cut_list)
+void printing_cut_list(set<pair<int, int>>& cut_list)
 {
     cout << "Cut list:" << endl;
 
     // range-based for loop
     for (auto const &edge : cut_list) {
         cout << "(" << edge.first << ", "
-             << edge.second << ")"
-             << " ";
+                << edge.second << ")"
+                << " ";
     }
 
     cout << "end of cut list" << endl;
 }
 
-int save_result_in_file_set(string file_name, set<pair<int, int>>& cut_list, int multiway_cut_cost, double exec_time)
+int save_result_in_file(string file_name, set<pair<int, int>>& cut_list, int multiway_cut_cost, double exec_time)
 {
     string full_path = "Solutions/Original algorithm/" + file_name.substr(0, file_name.find(".")) + ".sol";
     cout << full_path << endl;
@@ -115,28 +87,6 @@ int save_result_in_file_set(string file_name, set<pair<int, int>>& cut_list, int
 
     for (auto const &edge : cut_list) {
         sol_file << edge.first << " " << edge.second << endl;
-    }
-
-    sol_file.close();
-    return 0;
-}
-
-int save_result_in_file(string file_name, Node *cut_list, int multiway_cut_cost, double exec_time)
-{
-    string full_path = "Solutions/Original algorithm/" + file_name.substr(0, file_name.find(".")) + ".sol";
-    cout << full_path << endl;
-    ofstream sol_file(full_path);
-
-    sol_file << "custo " << multiway_cut_cost << endl;
-    sol_file << "tempo " << fixed << setprecision(2) << exec_time << endl;
-
-    Node *aux_p, *aux_q;
-    aux_q = cut_list;
-    while(aux_q != NULL)
-    {
-        sol_file << aux_q->u << " " << aux_q->v << endl;
-        aux_p = aux_q;
-        aux_q = aux_p->next;
     }
 
     sol_file.close();
@@ -192,59 +142,6 @@ bool read_graph(ListDigraph &digraph, string file_name,
     return true;
 }
 
-// searches new_edge in list. If found, does nothing
-// if not found, insert in numerical order
-bool insert_edge(Node *&list, tuple<int,int> &new_edge)
-{
-    Node *new_node = new Node();
-    //ordening new node by attribute u
-    if (get<0>(new_edge) < get<1>(new_edge))
-    {
-        new_node->u = get<0>(new_edge);
-        new_node->v = get<1>(new_edge);
-    }
-    else
-    {
-        new_node->u = get<1>(new_edge);
-        new_node->v = get<0>(new_edge);
-    }
-
-    // if list is empty
-    if (list == nullptr)
-    {
-        new_node->next = NULL;
-        list = new_node;
-        return true;
-    }
-
-    // else
-    Node *aux_curr, *aux_prev;
-    aux_curr = list;
-    aux_prev = nullptr;
-
-    while((aux_curr != nullptr) && ((aux_curr->u < new_node->u) || ((aux_curr->u == new_node->u) && (aux_curr->v < new_node->v))))
-    {
-        aux_prev = aux_curr;
-        aux_curr = aux_prev->next;
-    }
-
-    //edge already in the list
-    if(aux_curr != nullptr && aux_curr->u == new_node->u && aux_curr->v == new_node->v)
-        return false;
-
-    //we want to insert in the fist position
-    if(aux_prev == nullptr)
-    {
-        new_node->next = aux_curr;
-        list = new_node;
-        return true;
-    }
-
-    //we want to insert or between 2 nodes, or at the end
-    new_node->next = aux_curr;
-    aux_prev->next = new_node;
-    return true;
-}
 
 int position_highest_value_in_vector(vector<int> &vector)
 {
@@ -264,29 +161,6 @@ int position_highest_value_in_vector(vector<int> &vector)
 
 
 int calculate_cost_and_get_list(ListDigraph &digraph, ListDigraph::ArcMap<int> &capacity,
-                                vector<vector<tuple <int,int> > > &multiway_cut,
-                                Node*& cut_list, int &num_edges)
-{
-    int multiway_cut_cost = 0;
-    num_edges = 0;
-
-    for(int i=0; i < multiway_cut.size(); i++)
-    {
-        for(int j=0; j < multiway_cut[i].size(); j++)
-        {
-            if(insert_edge(cut_list, multiway_cut[i][j]))
-            {
-                multiway_cut_cost += capacity[findArc(digraph, digraph.nodeFromId((get<0>(multiway_cut[i][j]))-1),
-                                                digraph.nodeFromId((get<1>(multiway_cut[i][j])-1)) )];
-                num_edges++;
-            }
-        }
-    }
-    return multiway_cut_cost;
-}
-
-
-int calculate_cost_and_get_list_set(ListDigraph &digraph, ListDigraph::ArcMap<int> &capacity,
                                 vector<vector<tuple <int,int> > > &multiway_cut,
                                 set<pair<int, int>>& cut_list, int &num_edges)
 {
@@ -468,26 +342,17 @@ int main(int argc, char** argv)
     vector< vector <tuple <int, int> > > multiway_cut;
     get_multiway_cut(digraph, capacity, terminals, multiway_cut);
 
-    //linked list with cut edges in numerical order and with no repetition
-    Node* cut_list = NULL;
     set<pair<int, int>> cut_set;
     int num_edges = 0;
     int multiway_cut_cost = 0;
 
-    if(TYPE_OF_CUT == 0)
-        multiway_cut_cost = calculate_cost_and_get_list(digraph, capacity, multiway_cut, cut_list, num_edges);
-
-    if(TYPE_OF_CUT == 1)
-        multiway_cut_cost = calculate_cost_and_get_list_set(digraph, capacity, multiway_cut, cut_set, num_edges);
+    multiway_cut_cost = calculate_cost_and_get_list(digraph, capacity, multiway_cut, cut_set, num_edges);
 
     if (DEBUG_RESULT == true)
     {
         cout << "---------" << endl << "Solution: " << endl;
         printing_multiway_vector(multiway_cut);
-        if(TYPE_OF_CUT == 0)
-            printing_cut_list(cut_list);
-        if(TYPE_OF_CUT == 1)
-            printing_cut_list_set(cut_set);
+        printing_cut_list(cut_set);
         cout << "Number of edges: " << num_edges << endl;
         cout << "Cost of multiway cut: " << multiway_cut_cost << endl;
         cout << endl;
@@ -501,10 +366,7 @@ int main(int argc, char** argv)
          << fixed << setprecision(2) << time_taken;
     cout << " sec " << endl;
 
-    if(TYPE_OF_CUT == 0)
-        save_result_in_file(file_name, cut_list, multiway_cut_cost, time_taken);
-    if(TYPE_OF_CUT == 1)
-        save_result_in_file_set(file_name, cut_set, multiway_cut_cost, time_taken);
+    save_result_in_file(file_name, cut_set, multiway_cut_cost, time_taken);
 
     return 0;
 }
