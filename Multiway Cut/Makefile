@@ -4,15 +4,14 @@ CFLAGS= -Wall -g -o
 CODE= main_aux.cpp SimpleMultiwayDecoder.cpp
 
 # Targets:
-all:
-	$(CPP) $(CFLAGS) alg_teste $(CODE)
+all: alg_multiwaybrkga alg_simple_multiwaybrkga
 
-linkobjs: generateobjs
-	$(CPP) main_aux.o SimpleMultiwayDecoder.o
+alg_multiwaybrkga:
+	$(CPP) $(CFLAGS) alg_multiwaybrkga main_multiwaybrkga.cpp Classes/MultiwayDecoder.cpp Classes/MultiwaySolver.cpp
 
-generateobjs:
-	$(CPP) $(CFLAGS) -c main_aux.cpp SimpleMultiwayDecoder.cpp
+alg_simple_multiwaybrkga:
+	$(CPP) $(CFLAGS) alg_simple_multiwaybrkga main_simple_multiwaybrkga.cpp Classes/SimpleMultiwayDecoder.cpp
 
 # Remove:
-clean:
-	rm -f $(OBJECTS)
+#clean:
+#	rm -f $(OBJECTS)

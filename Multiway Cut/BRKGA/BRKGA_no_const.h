@@ -69,7 +69,7 @@ public:
 	 *                + double Decoder::decode(std::vector< double >& chromosome) const
 	 */
 	BRKGA(unsigned n, unsigned p, double pe, double pm, double rhoe,
-			const Decoder& refDecoder, RNG& refRNG, unsigned K = 1, unsigned MAX_THREADS = 1);
+			Decoder& refDecoder, RNG& refRNG, unsigned K = 1, unsigned MAX_THREADS = 1);
 
 	/**
 	 * Destructor
@@ -130,7 +130,7 @@ private:
 
 	// Templates:
 	RNG& refRNG;				// reference to the random number generator
-	const Decoder& refDecoder;	// reference to the problem-dependent Decoder
+	Decoder& refDecoder;	// reference to the problem-dependent Decoder
 
 	// Parallel populations parameters:
 	const unsigned K;				// number of independent parallel populations
@@ -148,7 +148,7 @@ private:
 
 template< class Decoder, class RNG >
 BRKGA< Decoder, RNG >::BRKGA(unsigned _n, unsigned _p, double _pe, double _pm, double _rhoe,
-		const Decoder& decoder, RNG& rng, unsigned _K, unsigned MAX) : n(_n), p(_p),
+		Decoder& decoder, RNG& rng, unsigned _K, unsigned MAX) : n(_n), p(_p),
 		pe(unsigned(_pe * p)), pm(unsigned(_pm * p)), rhoe(_rhoe),
 		refRNG(rng), refDecoder(decoder), K(_K), MAX_THREADS(MAX),
 		previous(K, 0), current(K, 0) {

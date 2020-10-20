@@ -11,10 +11,8 @@ using namespace std;
 SimpleMultiwayDecoder::SimpleMultiwayDecoder(string file_name)
 {
     bool leu_arquivo = read_file(file_name);
-    if (leu_arquivo)
-        cout << "leu arquivo" << endl;
-    else
-        cout << "nao rolou" << endl;
+    if (!leu_arquivo)
+        cout << "Erro ao tentar ler arquivo." << endl;
 }
 
 SimpleMultiwayDecoder::~SimpleMultiwayDecoder() { }
@@ -24,15 +22,9 @@ double SimpleMultiwayDecoder::decode(const vector< double >& chromosome)
     /*
      Valor do alelo indica em qual parte está o vértice (0->1/k, 1/k->2/k, ..., (k-1)/k->1)
      Cromossomo possui, então, um alelo para cada vértice no grafo, menos pros terminais
-
-     Uma observação sobre esse método dos baldes, como tratar o caso
-     que um vértice é associado a um conjunto que ele não tem arestas
-     ligando em vértices do mesmo?
-     a chance é mínima para grafos densos, mas imagino que isso deve ser
-     levado em conta no algoritmo *thinking emoji*
     */
+
     int cut_cost = 0;
-    //set<pair<int, int>, int> ;
     vector<int> vertices_groups;
     vertices_groups.assign(num_of_v, -1);
 
@@ -46,7 +38,7 @@ double SimpleMultiwayDecoder::decode(const vector< double >& chromosome)
     {
         if (vertices_groups[i]==-1)
         {   // gambiarra pra nao atribuir ao vertice o grupo num_of_t+1
-            // mas eh temporario, preciso descobrir como arrumar dpois
+            // mas eh temporario, posso ver formas melhores depois
             if (chromosome[vertex_index] == 1)
                 vertices_groups[i] = num_of_t-1;
             else
@@ -73,7 +65,7 @@ bool SimpleMultiwayDecoder::read_file(string file_name)
 {
     int source, target, weight;
     //specifying the full path
-    string full_path = "../Multiway Cut/Instances/" + file_name;
+    string full_path = "Instances/" + file_name;
 
     cout << "String: " << full_path << endl;
     // open a file in read mode

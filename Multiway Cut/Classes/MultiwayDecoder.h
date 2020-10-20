@@ -7,12 +7,19 @@
 
 class MultiwayDecoder {
 private:
-    std::string file_name;
+    std::string file;
+	int num_of_v;
+	int num_of_e;
+	int num_of_t;
+	
 public:
 	MultiwayDecoder(std::string);
 	~MultiwayDecoder();
 
 	double decode(const std::vector< double >&) const;
+	int get_num_of_v();
+	int get_num_of_e();
+	int get_num_of_t();
 };
 
 #endif

@@ -1,5 +1,5 @@
-#include <fstream>
 #include <iomanip>
+#include <fstream>
 #include "MultiwaySolver.h"
 #include <lemon/preflow.h>
 
