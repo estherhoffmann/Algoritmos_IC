@@ -8,7 +8,7 @@ def print_requirement():
     print('The first argument specify what you want to do:')
     print('0: just run the algorithm\n1: just build the table file\n2: both.\n')
     print('The second argument specify which algorithm/sols you want to use:')
-    print('0: original min cut based algorithm\n1: modified 1 (./multiway2)\n2: modified 2 (./multiway3)\n3: all of them')
+    print('0: original min cut based algorithm\n1: alternative (./multiway3)\n2: mixed 2 (./multiwaymix)\n3: all of them')
 
 # functions for human sorting
 def tryint(s):
@@ -27,15 +27,15 @@ def sort_nicely(l):
     l.sort(key=alphanum_key)
 # end of functions for human sorting
 
-def save_table_file(current_execution):
+def save_table_file(current_execution, exec_file):
     if current_execution == 0:
         sols_file_dir = 'Solutions/Original algorithm/'
     if current_execution == 1:
-        sols_file_dir = 'Solutions/Alternative 1/'
-    if current_execution == 2:
         sols_file_dir = 'Solutions/Alternative 2/'
+    if current_execution == 2:
+        sols_file_dir = 'Solutions/Mixed algorithm/'
 
-    table_file_name = 'multiway' + str(current_execution+1) +'_table'
+    table_file_name = exec_file +'_table'
     table_file_path = 'Solutions/' + table_file_name + ".txt"
 
     table_file = open(table_file_path, 'w')
@@ -45,7 +45,7 @@ def save_table_file(current_execution):
     sort_nicely(sols_list)
 
     for file_name in sols_list:
-        instance_path = "../Multiway Cut/Instances/" + file_name.split('.')[0] + ".txt"
+        instance_path = "Instances/" + file_name.split('.')[0] + ".txt"
         file_data = open(instance_path, 'r').read()
 
         lines = file_data.split('\n')
@@ -66,21 +66,21 @@ def save_table_file(current_execution):
     table_file.close()
     print('Done writing ' + table_file_path + '\n')
 
-def run_instances(current_execution):
+def run_instances(exec_file):
     file_list = os.listdir('Instances/')
     sort_nicely(file_list)
 
     instance_cnt = 0
     for file_name in file_list:
         if DEBUG >= 1:
-            print('Executing multiway' + str(current_execution+1) +' with ' + file_name)
-        os.system('./multiway' + str(current_execution+1) + " "  + file_name)
+            print('Executing ' + exec_file + ' with ' + file_name)
+        os.system('./' + exec_file + " "  + file_name)
         instance_cnt += 1
         if DEBUG >= 1:
             print()
 
     if DEBUG >= 1:
-        print('Done executing ./multiway' + str(current_execution+1) +  ' with ' + str(instance_cnt) + ' instances\n')
+        print('Done executing ./' + exec_file +  ' with ' + str(instance_cnt) + ' instances\n')
 
 def main():
     import sys
@@ -97,12 +97,17 @@ def main():
         print('This algorithm/sols type is not supported.')
         exit(0)
 
+    if execution_type == 1:
+        exec_file = 'multiway3'
+    if execution_type == 2:
+        exec_file = 'multiwaymix'
+
     # if the code will use only one algorithm (or its solution)
     if which_algorithm >= 0 and which_algorithm < 3:
         if execution_type == 0 or execution_type == 2: # if we want to run instances
-            run_instances(which_algorithm)
+            run_instances(exec_file)
         if execution_type == 1 or execution_type == 2: # if we want to save the table file
-            save_table_file(which_algorithm)
+            save_table_file(which_algorithm, exec_file)
 
     # if we will use all algorithms
     if which_algorithm == 3:

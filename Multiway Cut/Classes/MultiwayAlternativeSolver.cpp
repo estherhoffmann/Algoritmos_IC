@@ -231,12 +231,6 @@ void MultiwayAlternativeSolver::get_multiway_cut(ListDigraph &digraph, ListDigra
 
    /* we also dont need to get rid of the expensivest cut because we will not compute a cut for the
         last terminal, since there will be no terminal connected in the graph */
-
-   if (DEBUG >= 4)
-   {
-       cout << "-----" << endl << "Final print to make sure the graph has returned to original form: " << endl;
-       printing_graph(digraph, capacity, terminals);
-   }
 }
 
 

@@ -1,5 +1,5 @@
 custo 30
-tempo 0.10
+tempo 0.00
 1 6
 2 3
 2 5

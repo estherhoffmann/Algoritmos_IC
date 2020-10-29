@@ -5,7 +5,8 @@
 #include <iomanip>
 #include <chrono>
 //#include "Classes/MultiwaySolver.h"
-#include "Classes/MultiwayAlternativeSolver.h"
+//#include "Classes/MultiwayAlternativeSolver.h"
+#include "Classes/MultiwayMixSolver.h"
 
 int DEBUG = 0;
 int DEBUG_RESULT = false;
@@ -29,7 +30,10 @@ int main(int argc, char** argv)
     //MultiwaySolver solver(DEBUG);
 
     // instantiating Multiwaycut Alternative Solver object
-    MultiwayAlternativeSolver solver(DEBUG);
+    //MultiwayAlternativeSolver solver(DEBUG);
+
+    // instantiating Multiwaycut Alternative Solver object
+    MultiwayMixSolver solver(DEBUG);
 
     // instantiating graph, arc map for edge costs, and vector of terminals
     ListDigraph digraph;
@@ -38,7 +42,6 @@ int main(int argc, char** argv)
 
     // getting file name
     string file_name = argv[1];
-
 
     if(!solver.read_file(digraph, file_name, capacity, terminals))
     {
@@ -59,7 +62,9 @@ int main(int argc, char** argv)
     //set<pair<int, int>> cut_set;
     set<tuple<int, int, int>> cut_set;
     int multiway_cut_cost = 0;
-    multiway_cut_cost = solver.calculate_cost_and_get_list(digraph, capacity, multiway_cut, cut_set);
+    //multiway_cut_cost = solver.calculate_cost_and_get_list(digraph, capacity, multiway_cut, cut_set);
+    multiway_cut_cost = solver.calculate_cost_and_get_list(multiway_cut, cut_set);
+
 
     if (DEBUG_RESULT == true)
     {
