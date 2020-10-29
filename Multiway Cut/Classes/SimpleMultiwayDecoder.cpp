@@ -37,8 +37,7 @@ double SimpleMultiwayDecoder::decode(const vector< double >& chromosome)
     for(int i = 0; i < num_of_v; i++)
     {
         if (vertices_groups[i]==-1)
-        {   // gambiarra pra nao atribuir ao vertice o grupo num_of_t+1
-            // mas eh temporario, posso ver formas melhores depois
+        {   
             if (chromosome[vertex_index] == 1)
                 vertices_groups[i] = num_of_t-1;
             else

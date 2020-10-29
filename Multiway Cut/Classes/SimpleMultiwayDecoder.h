@@ -21,11 +21,6 @@
 
 class SimpleMultiwayDecoder {
 private:
-    /*
-    ListDigraph digraph;
-    ListDigraph::ArcMap<int> capacity(digraph);
-    vector<int> terminals;
-    */
     int num_of_v;
     int num_of_e;
     int num_of_t;

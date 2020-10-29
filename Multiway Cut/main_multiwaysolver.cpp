@@ -4,7 +4,8 @@
 #include <set>
 #include <iomanip>
 #include <chrono>
-#include "MultiwaySolver.h"
+//#include "Classes/MultiwaySolver.h"
+#include "Classes/MultiwayAlternativeSolver.h"
 
 int DEBUG = 0;
 int DEBUG_RESULT = false;
@@ -25,7 +26,10 @@ int main(int argc, char** argv)
     auto start = chrono::steady_clock::now();
 
     // instantiating Multiwaycut Solver object
-    MultiwaySolver solver(DEBUG);
+    //MultiwaySolver solver(DEBUG);
+
+    // instantiating Multiwaycut Alternative Solver object
+    MultiwayAlternativeSolver solver(DEBUG);
 
     // instantiating graph, arc map for edge costs, and vector of terminals
     ListDigraph digraph;
@@ -48,10 +52,12 @@ int main(int argc, char** argv)
     }
 
     //vector of (vector of tuples) that storages the edges of the cut on each iteration
-    vector< vector <tuple <int, int> > > multiway_cut;
+    //vector< vector <tuple <int, int> > > multiway_cut;
+    vector< vector <tuple <int, int, int> > > multiway_cut;
     solver.get_multiway_cut(digraph, capacity, terminals, multiway_cut);
 
-    set<pair<int, int>> cut_set;
+    //set<pair<int, int>> cut_set;
+    set<tuple<int, int, int>> cut_set;
     int multiway_cut_cost = 0;
     multiway_cut_cost = solver.calculate_cost_and_get_list(digraph, capacity, multiway_cut, cut_set);
 
