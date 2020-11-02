@@ -17,7 +17,8 @@ SimpleMultiwayDecoder::SimpleMultiwayDecoder(string file_name)
 
 SimpleMultiwayDecoder::~SimpleMultiwayDecoder() { }
 
-double SimpleMultiwayDecoder::decode(const vector< double >& chromosome)
+
+double SimpleMultiwayDecoder::decode(const vector< double >& chromosome) const
 {
     /*
      Valor do alelo indica em qual parte está o vértice (0->1/k, 1/k->2/k, ..., (k-1)/k->1)
@@ -46,7 +47,7 @@ double SimpleMultiwayDecoder::decode(const vector< double >& chromosome)
         }
     }
 
-    map<pair<int, int>, int>::iterator itr;
+    map<pair<int, int>, int>::const_iterator itr;
     for (itr = edges.begin(); itr != edges.end(); ++itr)
     {
         if (vertices_groups[itr->first.first] != vertices_groups[itr->first.second])
@@ -59,14 +60,12 @@ double SimpleMultiwayDecoder::decode(const vector< double >& chromosome)
 }
 
 
-// reads graph file
 bool SimpleMultiwayDecoder::read_file(string file_name)
 {
     int source, target, weight;
     //specifying the full path
     string full_path = "Instances/" + file_name;
 
-    cout << "String: " << full_path << endl;
     // open a file in read mode
     ifstream graph_file;
     graph_file.open(full_path);
@@ -98,7 +97,6 @@ bool SimpleMultiwayDecoder::read_file(string file_name)
     return true;
 }
 
-
 int SimpleMultiwayDecoder::get_num_of_v()
 {
     return num_of_v;
@@ -129,4 +127,41 @@ int SimpleMultiwayDecoder::get_edge_cost(std::pair<int, int> edge)
         cout << "Not found\n";
         return -1;
     }
+}
+
+
+set<pair<int,int>> SimpleMultiwayDecoder::get_cut_list(const vector<double>& chromosome) const
+{
+    vector<int> vertices_groups;
+    vertices_groups.assign(num_of_v, -1);
+
+    for(int i = 0; i < num_of_t; i++)
+    {
+        vertices_groups[terminals[i]] = i;
+    }
+
+    int vertex_index = 0;
+    for(int i = 0; i < num_of_v; i++)
+    {
+        if (vertices_groups[i]==-1)
+        {   
+            if (chromosome[vertex_index] == 1)
+                vertices_groups[i] = num_of_t-1;
+            else
+                vertices_groups[i] = (int)(chromosome[vertex_index]*(num_of_t));
+            vertex_index++;
+        }
+    }
+
+    set<pair<int,int>> cut_list; 
+    map<pair<int, int>, int>::const_iterator itr;
+    for (itr = edges.begin(); itr != edges.end(); ++itr)
+    {
+        if (vertices_groups[itr->first.first] != vertices_groups[itr->first.second])
+        {
+            cut_list.insert(make_pair((itr->first.first)+1, (itr->first.second)+1));
+        }
+    }
+
+    return cut_list;
 }

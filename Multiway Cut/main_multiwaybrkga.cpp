@@ -8,6 +8,12 @@
 
 using namespace std;
 
+void decoder_test(string file_name, const vector< double >& chromosome)
+{
+    MultiwayDecoder decoder(file_name);	
+    int cost = decoder.decode(chromosome);
+    cout << "Cost: " << cost << endl;
+}
 
 void run_BRKGA(string file_name)
 {
@@ -25,7 +31,7 @@ void run_BRKGA(string file_name)
 	const double pm = 0.10;		                    // fraction of population to be replaced by mutants
 	const double rhoe = 0.70;	                    // probability that offspring inherit an allele from elite parent
 	const unsigned K = 3;		                    // number of independent populations
-	const unsigned MAXT = 1;	                    // number of threads for parallel decoding
+	const unsigned MAXT = 2;	                    // number of threads for parallel decoding
 
 	const long unsigned rngSeed = 0;	// seed to the random number generator
 	MTRand rng(rngSeed);				// initialize the random number generator
@@ -41,10 +47,10 @@ void run_BRKGA(string file_name)
 
 	do {
 		algorithm.evolve();	// evolve the population for one generation
-        cout << generation << "°, ";
 
 		if((++generation) % X_INTVL == 0) {
 			algorithm.exchangeElite(X_NUMBER);	// exchange top individuals
+            cout << generation << "°, ";
 		}
 	} while (generation < MAX_GENS);
     cout << endl;
@@ -66,9 +72,17 @@ int main(int argc, char** argv)
 
     auto start = chrono::steady_clock::now();
     string file_name = argv[1];
-
-    run_BRKGA(file_name);
     
+    run_BRKGA(file_name);
+
+    /*
+    vector< double > chromosome;
+    for (int i=0; i < 18; i++)
+        chromosome.push_back(0.8);
+
+    decoder_test(file_name, chromosome);
+    */
+
     auto end = chrono::steady_clock::now();
     chrono::duration<double> diff = end - start;
     double time_taken = diff.count();

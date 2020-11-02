@@ -48,6 +48,7 @@ double MultiwayDecoder::decode(const std::vector< double >& chromosome) const
     // instantiating graph, arc map for edge costs, and vector of terminals
     ListDigraph digraph;
     ListDigraph::ArcMap<int> capacity(digraph);
+    ListDigraph::ArcMap<int> perturbed_costs(digraph);
     vector<int> terminals;
 
     if(!solver.read_file(digraph, file, capacity, terminals))
@@ -56,18 +57,42 @@ double MultiwayDecoder::decode(const std::vector< double >& chromosome) const
         return 0;
     }
 
-    //vector of (vector of tuples) that storages the edges of the cut on each iteration
+    /*
+        Abaixo temos a manipulação dos custos das arestas de acordo com os cromossomos:
+        Custo novo da aresta = (1 - alpha + 2 * alpha * alelo) * custo original
+
+        sendo alpha um número real > 0 que determina a intensidade da perturbação.
+        ~ Para um alelo < 0.5, o custo da aresta recebe um disconto;
+            para um alelo > 0.5, o custo recebe ganho de valor
+    */
+
+    // solver.printing_graph(digraph, capacity, terminals);
+
+   
+    double perturb_intensity = 1; // alpha
+    int chromosome_index = 0;
+
+    for (ListDigraph::ArcIt arc(digraph); arc != INVALID; ++arc)
+    {
+        perturbed_costs[arc] = ( 1 - perturb_intensity + ( 2 * perturb_intensity * chromosome[chromosome_index] ) ) * capacity[arc];
+        chromosome_index++;
+    }
+
+    // solver.printing_graph(digraph, capacity, terminals);
+
+    // vector of (vector of tuples) that storages the edges of the cut on each iteration
     vector< vector <tuple <int, int> > > multiway_cut;
-    solver.get_multiway_cut(digraph, capacity, terminals, multiway_cut);
+    solver.get_multiway_cut(digraph, perturbed_costs, terminals, multiway_cut);
 
     set<pair<int, int>> cut_set;
     int multiway_cut_cost = 0;
     multiway_cut_cost = solver.calculate_cost_and_get_list(digraph, capacity, multiway_cut, cut_set);
 
-	// sample fitness is the first allele
-	return (double)multiway_cut_cost;
+
+    // sample fitness is the first allele
+    return (double)multiway_cut_cost;
 }
 
-int MultiwayDecoder::get_num_of_v() { return num_of_v; }
-int MultiwayDecoder::get_num_of_e() { return num_of_e; }
-int MultiwayDecoder::get_num_of_t() { return num_of_t; }
+int MultiwayDecoder::get_num_of_v() const { return num_of_v; }
+int MultiwayDecoder::get_num_of_e() const { return num_of_e; }
+int MultiwayDecoder::get_num_of_t() const { return num_of_t; }
