@@ -8,7 +8,7 @@ def print_requirement():
     print('The first argument specify what you want to do:')
     print('0: just run the algorithm\n1: just build the table file\n2: both.\n')
     print('The second argument specify which algorithm/sols you want to use:')
-    print('0: original min cut based algorithm\n1: alternative (./multiway3)\n2: mixed 2 (./multiwaymix)\n3: all of them')
+    print('0: original min cut based algorithm\n1: alternative (./multiway3)\n2: mixed 2 (./multiwaymix)\n3: BRKGA with SimpleMultiwaySolver \n4:all of them')
 
 # functions for human sorting
 def tryint(s):
@@ -34,6 +34,8 @@ def save_table_file(current_execution, exec_file):
         sols_file_dir = 'Solutions/Alternative 2/'
     if current_execution == 2:
         sols_file_dir = 'Solutions/Mixed algorithm/'
+    if current_execution == 3:
+        sols_file_dir = 'Solutions/BRKGA simple solver/'
 
     table_file_name = exec_file +'_table'
     table_file_path = 'Solutions/' + table_file_name + ".txt"
@@ -93,29 +95,31 @@ def main():
     if execution_type > 2 or execution_type < 0:
         print('This execution type is not supported.')
         exit(0)
-    if which_algorithm > 3 or which_algorithm < 0:
+    if which_algorithm > 4 or which_algorithm < 0:
         print('This algorithm/sols type is not supported.')
         exit(0)
 
-    if execution_type == 1:
+    if which_algorithm == 1:
         exec_file = 'multiway3'
-    if execution_type == 2:
+    if which_algorithm == 2:
         exec_file = 'multiwaymix'
+    if which_algorithm == 3:
+        exec_file = 'alg_simple_multiwaybrkga'
 
     # if the code will use only one algorithm (or its solution)
-    if which_algorithm >= 0 and which_algorithm < 3:
+    if which_algorithm >= 0 and which_algorithm < 4:
         if execution_type == 0 or execution_type == 2: # if we want to run instances
             run_instances(exec_file)
         if execution_type == 1 or execution_type == 2: # if we want to save the table file
             save_table_file(which_algorithm, exec_file)
 
     # if we will use all algorithms
-    if which_algorithm == 3:
-        for i in range(0, 3):
+    if which_algorithm == 4:
+        for i in range(0, which_algorithm):
             if execution_type == 0 or execution_type == 2: # if we want to run instances
                 run_instances(i)
             if execution_type == 1 or execution_type == 2: # if we want to save the table file
                 save_table_file(i)
 
 if __name__ == "__main__":
-    main();
+    main()
