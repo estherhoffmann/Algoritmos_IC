@@ -1,20 +1,20 @@
 #include <iomanip>
 #include <fstream>
-#include "MultiwaySolver.h"
+#include "Multiway1Solver.h"
 #include <lemon/preflow.h>
 
 using namespace std;
 using namespace lemon;
 
-MultiwaySolver::MultiwaySolver(int debug)
+Multiway1Solver::Multiway1Solver(int debug)
 {  
     DEBUG = debug;
 }
 
-MultiwaySolver::~MultiwaySolver() { }
+Multiway1Solver::~Multiway1Solver() { }
 
 
-void MultiwaySolver::printing_graph(ListDigraph &digraph, ListDigraph::ArcMap<int> &capacity, vector<int> &terminals)
+void Multiway1Solver::printing_graph(ListDigraph &digraph, ListDigraph::ArcMap<int> &capacity, vector<int> &terminals)
 {
     for (ListDigraph::ArcIt m(digraph); m != INVALID; ++m)
     {
@@ -31,7 +31,7 @@ void MultiwaySolver::printing_graph(ListDigraph &digraph, ListDigraph::ArcMap<in
     cout << endl;
 }
 
-void MultiwaySolver::printing_multiway_vector(std::vector< std::vector <std::tuple <int, int> > > &multiway_cut)
+void Multiway1Solver::printing_multiway_vector(std::vector< std::vector <std::tuple <int, int> > > &multiway_cut)
 {
     cout << "Multiway_cut vector: " << endl;
     for(int i=0; i < multiway_cut.size(); i++)
@@ -46,7 +46,7 @@ void MultiwaySolver::printing_multiway_vector(std::vector< std::vector <std::tup
     cout << endl;
 }
 
-void MultiwaySolver::printing_cut_list(set<pair<int, int>>& cut_list)
+void Multiway1Solver::printing_cut_list(set<pair<int, int>>& cut_list)
 {
     cout << "Cut list:" << endl;
 
@@ -62,7 +62,7 @@ void MultiwaySolver::printing_cut_list(set<pair<int, int>>& cut_list)
 
 
 // read graph file and saves it in our graph structure
-bool MultiwaySolver::read_file(ListDigraph &digraph, string file_name,
+bool Multiway1Solver::read_file(ListDigraph &digraph, string file_name,
                 ListDigraph::ArcMap<int> &capacity, vector<int> &terminals)
 {
     int num_of_e, num_of_v, num_of_t, source, target, weight;
@@ -112,7 +112,7 @@ bool MultiwaySolver::read_file(ListDigraph &digraph, string file_name,
 
 
 // stores in cut_set the cut edges w/out repetition, and returns the cut cost
-int MultiwaySolver::calculate_cost_and_get_list(ListDigraph &digraph, ListDigraph::ArcMap<int> &capacity,
+int Multiway1Solver::calculate_cost_and_get_list(ListDigraph &digraph, ListDigraph::ArcMap<int> &capacity,
                                 vector<vector<tuple <int,int> > > &multiway_cut,
                                 set<pair<int, int>>& cut_list)
 {
@@ -127,6 +127,7 @@ int MultiwaySolver::calculate_cost_and_get_list(ListDigraph &digraph, ListDigrap
                 aux_pair = make_pair(get<0>(multiway_cut[i][j]), get<1>(multiway_cut[i][j]));
             else
                 aux_pair = make_pair(get<1>(multiway_cut[i][j]), get<0>(multiway_cut[i][j]));
+            
             if(get<1>(cut_list.insert(aux_pair)))
             {
                 multiway_cut_cost += capacity[findArc(digraph, digraph.nodeFromId((get<0>(multiway_cut[i][j]))-1),
@@ -138,7 +139,7 @@ int MultiwaySolver::calculate_cost_and_get_list(ListDigraph &digraph, ListDigrap
 }
 
 
-int MultiwaySolver::position_highest_value_in_vector(vector<int> &vector)
+int Multiway1Solver::position_highest_value_in_vector(vector<int> &vector)
 {
     int position = 0, highest_value = 0;
 
@@ -155,7 +156,7 @@ int MultiwaySolver::position_highest_value_in_vector(vector<int> &vector)
 
 
 //update the vector of Arcs and edges of the cut, using the mincut NodeMap
-void MultiwaySolver::update_multiwaycut_and_arcs(ListDigraph &digraph, ListDigraph::NodeMap<bool> &mincut,
+void Multiway1Solver::update_multiwaycut_and_arcs(ListDigraph &digraph, ListDigraph::NodeMap<bool> &mincut,
                     vector<vector<tuple <int, int>>> &multiway_cut)
 {
     ListDigraph::Node target_node;
@@ -190,7 +191,7 @@ void MultiwaySolver::update_multiwaycut_and_arcs(ListDigraph &digraph, ListDigra
 
 
 // finds max flow for each terminal and stores all cut edges in multiway_cut
-void MultiwaySolver::get_multiway_cut(ListDigraph &digraph, ListDigraph::ArcMap<int> &capacity, vector<int> &terminals,
+void Multiway1Solver::get_multiway_cut(ListDigraph &digraph, ListDigraph::ArcMap<int> &capacity, vector<int> &terminals,
                    vector<vector<tuple <int, int>>> &multiway_cut)
 {
     // stores nodemap of maxflow algorithm
@@ -255,7 +256,7 @@ void MultiwaySolver::get_multiway_cut(ListDigraph &digraph, ListDigraph::ArcMap<
 
 
 // saves our result in file
-int MultiwaySolver::save_result_in_file(string file_name, set<pair<int, int>>& cut_list, int multiway_cut_cost, double exec_time)
+int Multiway1Solver::save_result_in_file(string file_name, set<pair<int, int>>& cut_list, int multiway_cut_cost, double exec_time)
 {
     string full_path = "Solutions/Original algorithm/" + file_name.substr(0, file_name.find(".")) + ".sol";
     cout << full_path << endl;

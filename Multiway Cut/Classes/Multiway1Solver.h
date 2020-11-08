@@ -1,5 +1,5 @@
-#ifndef MULTIWAYSOLVER_H
-#define MULTIWAYSOLVER_H
+#ifndef MULTIWAY1SOLVER_H
+#define MULTIWAY1SOLVER_H
 #include <iostream>
 #include <vector>
 #include <string>
@@ -12,7 +12,7 @@
 using namespace lemon;
 using namespace std;
 
-class MultiwaySolver {
+class Multiway1Solver {
 private:
     // variable for debugging
     int DEBUG;
@@ -23,8 +23,8 @@ private:
 
 public:
 
-	MultiwaySolver(int);
-	~MultiwaySolver();
+	Multiway1Solver(int);
+	~Multiway1Solver();
 
     void printing_graph(ListDigraph&, ListDigraph::ArcMap<int>&, vector<int>&);
        

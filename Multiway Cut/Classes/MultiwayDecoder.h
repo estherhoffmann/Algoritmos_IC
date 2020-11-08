@@ -17,6 +17,7 @@ public:
 	~MultiwayDecoder();
 
 	double decode(const std::vector< double >&) const;
+	void get_multiway_cut(const std::vector< double >&, int&, std::set<std::pair<int, int>>&);
 	int get_num_of_v() const;
 	int get_num_of_e() const;
 	int get_num_of_t() const;
