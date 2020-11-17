@@ -2,6 +2,7 @@
 #include "MultiwayDecoder.h"
 #include <iostream>
 #include <fstream>
+#include <cmath>
 
 using namespace std;
 using namespace lemon;
@@ -55,14 +56,7 @@ double MultiwayDecoder::decode(const std::vector< double >& chromosome) const
         return 0;
     }
 
-    /*
-        Abaixo temos a manipulação dos custos das arestas de acordo com os cromossomos:
-        Custo novo da aresta = (1 - alpha + 2 * alpha * alelo) * custo original
-
-        sendo alpha um número real > 0 que determina a intensidade da perturbação.
-        ~ Para um alelo < 0.5, o custo da aresta recebe um disconto;
-            para um alelo > 0.5, o custo recebe ganho de valor
-    */
+    // Abaixo temos a manipulação dos custos das arestas de acordo com os cromossomos:
    
     double perturb_intensity = 1; // alpha
     int chromosome_index = 0;
@@ -74,10 +68,30 @@ double MultiwayDecoder::decode(const std::vector< double >& chromosome) const
     {
         if (perturbed_costs[arc] == -1)
         {
-            perturbed_costs[arc] = ( 1 - perturb_intensity + ( 2 * perturb_intensity * chromosome[chromosome_index] ) ) * capacity[arc];
+             /*  Função de perturbação da EvFW
+                Custo novo da aresta = (1 - alpha + 2 * alpha * alelo) * custo original
+
+                sendo alpha um número real > 0 que determina a intensidade da perturbação.
+                ~ Para um alelo < 0.5, o custo da aresta recebe um disconto;
+                para um alelo > 0.5, o custo recebe ganho de valor
+            */
+            //perturbed_costs[arc] = ( 1 - perturb_intensity + ( 2 * perturb_intensity * chromosome[chromosome_index] ) ) * capacity[arc];
+
+
+            /*  Função de perturbação do Mário
+                Custo novo da aresta = ( M * custo original ) / ( 2 ^ ( N * alelo ) )
+
+                sendo alpha M = 2^(N/2). Para o alelo = 0.5 ser neutro, é necessário que  N = 20, M = 2^10 (1024).
+            */
+            perturbed_costs[arc] = (int)( 1024 * capacity[arc] ) / ( pow(2, 20*chromosome[chromosome_index]) );
 
             ListDigraph::Arc reverse_arc = findArc(digraph, digraph.target(arc), digraph.source(arc));
-            perturbed_costs[reverse_arc] = ( 1 - perturb_intensity + ( 2 * perturb_intensity * chromosome[chromosome_index] ) ) * capacity[reverse_arc];
+
+            // Perturbação EvFW
+            //perturbed_costs[reverse_arc] = ( 1 - perturb_intensity + ( 2 * perturb_intensity * chromosome[chromosome_index] ) ) * capacity[reverse_arc];
+
+            // Perturbação Mário
+            perturbed_costs[reverse_arc] = (int)( 1024 * capacity[reverse_arc] ) / ( pow(2, 20*chromosome[chromosome_index]) );
 
             chromosome_index++;
         }
@@ -122,9 +136,31 @@ void MultiwayDecoder::get_multiway_cut(const std::vector< double >& chromosome, 
     {
         if (perturbed_costs[arc] == -1)
         {
-            perturbed_costs[arc] = ( 1 - perturb_intensity + ( 2 * perturb_intensity * chromosome[chromosome_index] ) ) * capacity[arc];
+            /*  Função de perturbação da EvFW
+                Custo novo da aresta = (1 - alpha + 2 * alpha * alelo) * custo original
+
+                sendo alpha um número real > 0 que determina a intensidade da perturbação.
+                ~ Para um alelo < 0.5, o custo da aresta recebe um disconto;
+                para um alelo > 0.5, o custo recebe ganho de valor
+            */
+            //perturbed_costs[arc] = ( 1 - perturb_intensity + ( 2 * perturb_intensity * chromosome[chromosome_index] ) ) * capacity[arc];
+
+
+            /*  Função de perturbação do Mário
+                Custo novo da aresta = ( M * custo original ) / ( 2 ^ ( N * alelo ) )
+
+                sendo alpha M = 2^(N/2). Para o alelo = 0.5 ser neutro, é necessário que  N = 20, M = 2^10 (1024).
+            */
+            perturbed_costs[arc] = (int)( 1024 * capacity[arc] ) / ( pow(2, 20*chromosome[chromosome_index]) );
+
             ListDigraph::Arc reverse_arc = findArc(digraph, digraph.target(arc), digraph.source(arc));
-            perturbed_costs[reverse_arc] = ( 1 - perturb_intensity + ( 2 * perturb_intensity * chromosome[chromosome_index] ) ) * capacity[reverse_arc];
+
+            // Perturbação EvFW
+            //perturbed_costs[reverse_arc] = ( 1 - perturb_intensity + ( 2 * perturb_intensity * chromosome[chromosome_index] ) ) * capacity[reverse_arc];
+
+            // Perturbação Mário
+            perturbed_costs[reverse_arc] = (int)( 1024 * capacity[reverse_arc] ) / ( pow(2, 20*chromosome[chromosome_index]) );
+
             chromosome_index++;
         }
     }

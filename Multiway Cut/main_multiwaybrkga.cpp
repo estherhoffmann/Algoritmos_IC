@@ -132,16 +132,16 @@ int main(int argc, char** argv)
 {
     if(argc < 3)
     {
-        cout << "This code requires a instance input and a solver option" << endl;
-        cout << "Please select instance one from the instances directory. (i.e. ./multiwaybrkga steinb1.txt)" << endl;
+        cout << "This code requires (first) a solver option, and (second) a instance input." << endl;
         cout << "Choose which solver you want to use:" << endl << "0: simple solver; 1: multiway1";
+        cout << "Please select instance one from the instances directory. (i.e. ./multiwaybrkga steinb1.txt)" << endl;
         return 0;
     }
     
 
     auto start = chrono::steady_clock::now();
-    string file_name = argv[1];
-    string which_solver = argv[2];
+    string which_solver = argv[1];
+    string file_name = argv[2];
 
     /*
     // to test a new decoder:
@@ -175,7 +175,7 @@ int main(int argc, char** argv)
         save_result(file_name, "BRKGA simple solver/", cut_set, cut_cost, time_taken);
 
     if (which_solver == "1")
-        save_result(file_name, "BRKGA Multiway1 solver/", cut_set, cut_cost, time_taken);
+        save_result(file_name, "BRKGA multiway1 solver perturb2/", cut_set, cut_cost, time_taken);
 
     return 0;
 }

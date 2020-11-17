@@ -5,12 +5,18 @@ DEBUG = 1
 
 def print_requirement():
     print('This script requires two arguments.\n')
-    print('The first argument specify what you want to do:')
-    print('0: just run the algorithm\n1: just build the table file\n2: both.\n')
-    print('The second argument specify which algorithm/sols you want to use:')
-    print('0: original min cut based algorithm\n1: alternative (./multiway3)\n2: mixed 2 (./multiwaymix)\n3: BRKGA with SimpleMultiwaySolver \n4:all of them')
 
-# functions for human sorting
+    print('In the first argument you choose which algorithm you want to run:')
+    print('0: original min cut based algorithm (./multiway1')
+    print('1: alternative (./multiway3)')
+    print('2: mixed (./multiwaymix)')
+    print('3: BRKGA with SimpleMultiwaySolver')
+    print('4: BRKGA with multiway1 solver\n')
+
+    print('The second argument specify the instances\' directories')
+    
+
+# begin functions for human sorting
 def tryint(s):
     try:
         return int(s)
@@ -25,17 +31,23 @@ def alphanum_key(s):
 def sort_nicely(l):
     #Sort the given list in the way that humans expect.
     l.sort(key=alphanum_key)
-# end of functions for human sorting
 
-def save_table_file(current_execution, exec_file):
-    if current_execution == 0:
+# end functions for human sorting
+
+def save_table_file(which_algorithm, exec_file, instances_file):
+
+    if which_algorithm == 0:
         sols_file_dir = 'Solutions/Original algorithm/'
-    if current_execution == 1:
+    if which_algorithm == 1:
         sols_file_dir = 'Solutions/Alternative 2/'
-    if current_execution == 2:
+    if which_algorithm == 2:
         sols_file_dir = 'Solutions/Mixed algorithm/'
-    if current_execution == 3:
+    if which_algorithm == 3:
         sols_file_dir = 'Solutions/BRKGA simple solver/'
+        exec_file = 'simple_multiwaybrkga'
+    if which_algorithm == 4:
+        sols_file_dir = 'Solutions/BRKGA multiway1 solver perturb1/'
+        exec_file = 'multiway1brkga_perturb1'
 
     table_file_name = exec_file +'_table'
     table_file_path = 'Solutions/' + table_file_name + ".txt"
@@ -47,7 +59,10 @@ def save_table_file(current_execution, exec_file):
     sort_nicely(sols_list)
 
     for file_name in sols_list:
-        instance_path = "Instances/" + file_name.split('.')[0] + ".txt"
+        if os.path.isdir(file_name):
+            continue
+        
+        instance_path = instances_file + file_name.split('.')[0] + ".txt"
         file_data = open(instance_path, 'r').read()
 
         lines = file_data.split('\n')
@@ -58,9 +73,7 @@ def save_table_file(current_execution, exec_file):
 
         file_data = open(sols_file_dir + file_name, 'r').read()
         lines = file_data.split('\n')
-        #parts = lines[0].split()
         cost = int(lines[0].split()[1])
-        #parts = lines[1].split()
         exec_time = float(lines[1].split()[1])
 
         table_file.write("%s %d %d %d %d %.2f\n" %(file_name.split('.')[0], num_v, num_e, num_t, cost, exec_time))
@@ -68,8 +81,9 @@ def save_table_file(current_execution, exec_file):
     table_file.close()
     print('Done writing ' + table_file_path + '\n')
 
-def run_instances(exec_file):
-    file_list = os.listdir('Instances/')
+
+def run_instances(exec_file, instances_file):
+    file_list = os.listdir(instances_file)
     sort_nicely(file_list)
 
     instance_cnt = 0
@@ -84,42 +98,37 @@ def run_instances(exec_file):
     if DEBUG >= 1:
         print('Done executing ./' + exec_file +  ' with ' + str(instance_cnt) + ' instances\n')
 
+
 def main():
     import sys
     if len(sys.argv) <= 2:
         print_requirement()
         exit(0)
 
-    execution_type = int(sys.argv[1].strip())
-    which_algorithm = int(sys.argv[2].strip())
-    if execution_type > 2 or execution_type < 0:
-        print('This execution type is not supported.')
-        exit(0)
-    if which_algorithm > 4 or which_algorithm < 0:
+    which_algorithm = int(sys.argv[1].strip())
+    instances_file = sys.argv[2].strip()
+
+    if which_algorithm < 0 or which_algorithm > 4:
         print('This algorithm/sols type is not supported.')
         exit(0)
+    if not os.path.exists(instances_file):
+        print('This instance directiory does not exist.')
+        exit(0)
 
+    if which_algorithm == 0:
+        exec_file = 'multiwat1'
     if which_algorithm == 1:
         exec_file = 'multiway3'
     if which_algorithm == 2:
         exec_file = 'multiwaymix'
     if which_algorithm == 3:
-        exec_file = 'alg_simple_multiwaybrkga'
-
-    # if the code will use only one algorithm (or its solution)
-    if which_algorithm >= 0 and which_algorithm < 4:
-        if execution_type == 0 or execution_type == 2: # if we want to run instances
-            run_instances(exec_file)
-        if execution_type == 1 or execution_type == 2: # if we want to save the table file
-            save_table_file(which_algorithm, exec_file)
-
-    # if we will use all algorithms
+        exec_file = 'multiwaybrkga 0' # 3: BRKGA with SimpleMultiwaySolver
     if which_algorithm == 4:
-        for i in range(0, which_algorithm):
-            if execution_type == 0 or execution_type == 2: # if we want to run instances
-                run_instances(i)
-            if execution_type == 1 or execution_type == 2: # if we want to save the table file
-                save_table_file(i)
+        exec_file = 'multiwaybrkga 1' # 4: BRKGA with multiway1 solver
+
+    #run_instances(exec_file, instances_file)
+    save_table_file(which_algorithm, exec_file, instances_file)
+
 
 if __name__ == "__main__":
     main()
