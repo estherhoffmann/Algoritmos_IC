@@ -34,7 +34,7 @@ public:
     int calculate_cost_and_get_list(ListDigraph&, ListDigraph::ArcMap<int>&, vector< vector <tuple <int, int, int>>>&, set<tuple<int, int, int>>&);  
 
     // finds max flow for each terminal and stores all cut edges in multiway_cut
-    void get_multiway_cut(ListDigraph&, ListDigraph::ArcMap<int>&, vector<int>&, vector< vector <tuple <int, int, int>>>&);
+    void get_multiway_cut(ListDigraph&, ListDigraph::ArcMap<int>&, vector<int>&, vector<int>&, vector< vector <tuple <int, int, int>>>&);
     
      // saves our result in file
     int save_result_in_file(string, set<tuple<int, int, int>>&, int, double);

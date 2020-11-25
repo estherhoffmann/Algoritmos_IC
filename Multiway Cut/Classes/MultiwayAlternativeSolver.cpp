@@ -179,9 +179,14 @@ void MultiwayAlternativeSolver::update_multiwaycut_and_arcs(ListDigraph &digraph
 }
 
 
-// finds max flow for each terminal and stores all cut edges in multiway_cut
-void MultiwayAlternativeSolver::get_multiway_cut(ListDigraph &digraph, ListDigraph::ArcMap<int> &capacity, vector<int> &terminals,
-                   vector<vector<tuple <int, int, int>>> &multiway_cut)
+/* 
+    finds max flow for each terminal and stores all cut edges in multiway_cut.
+    vector terminals_order determinates the order in which the algorithm will calculate min cuts.
+    the first min cut will be calculated for terminals[terminals_order[0]] vertex
+    so, for all x in terminals_order, 0 < x < terminals.size()
+*/
+void MultiwayAlternativeSolver::get_multiway_cut(ListDigraph &digraph, ListDigraph::ArcMap<int> &capacity, vector<int> &terminals, 
+                    vector<int> &terminals_order, vector<vector<tuple <int, int, int>>> &multiway_cut)
 {
   
    ListDigraph::NodeMap<bool> mincut(digraph);
@@ -198,13 +203,13 @@ void MultiwayAlternativeSolver::get_multiway_cut(ListDigraph &digraph, ListDigra
    }
 
    //computing mincut for each terminal and getting the arcs of the cut
-   for (int current_term = 0; current_term < terminals.size(); current_term++)
+   for (int current_term = 0; current_term < terminals_order.size(); current_term++)
    {
-       digraph.erase(findArc(digraph, digraph.nodeFromId(terminals[current_term]), artificial_sink));
+       digraph.erase(findArc(digraph, digraph.nodeFromId(terminals[terminals_order[current_term]]), artificial_sink));
 
        if (DEBUG >= 2)
        {
-           cout <<  "-----" << endl << "Iteration with source = terminal " << terminals[current_term]+1 << endl << endl;
+           cout <<  "-----" << endl << "Iteration with source = terminal " << terminals[terminals_order[current_term]]+1 << endl << endl;
            if (DEBUG >=4)
            {
                printing_graph(digraph, capacity, terminals);
@@ -212,7 +217,7 @@ void MultiwayAlternativeSolver::get_multiway_cut(ListDigraph &digraph, ListDigra
        }
 
        //min-cut algorithm from lemon
-       Preflow<ListDigraph> preflow(digraph, capacity, digraph.nodeFromId(terminals[current_term]), artificial_sink);
+       Preflow<ListDigraph> preflow(digraph, capacity, digraph.nodeFromId(terminals[terminals_order[current_term]]), artificial_sink);
        preflow.runMinCut();
        preflow.minCutMap(mincut);
        min_cut_values.push_back(preflow.flowValue());

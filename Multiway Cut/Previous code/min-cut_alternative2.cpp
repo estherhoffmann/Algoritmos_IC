@@ -291,7 +291,7 @@ void update_multiwaycut(ListDigraph &digraph, ListDigraph::NodeMap<bool> &mincut
 }
 
 
-int get_multiway_cut(ListDigraph &digraph, ListDigraph::ArcMap<int> &capacity, vector<int> &terminals,
+void get_multiway_cut(ListDigraph &digraph, ListDigraph::ArcMap<int> &capacity, vector<int> &terminals,
                    vector<vector<tuple <int, int, int>>> &multiway_cut)
 {
    ListDigraph::NodeMap<bool> mincut(digraph);
@@ -299,7 +299,6 @@ int get_multiway_cut(ListDigraph &digraph, ListDigraph::ArcMap<int> &capacity, v
 
    ListDigraph::Node artificial_sink = digraph.addNode();
    ListDigraph::Arc infinity_arc;
-   int multiway_cut_cost = 0;
 
    //creating "infinity" arcs from all the terminals to the artificial_sink
    for (int t = 0; t < terminals.size(); t++)
@@ -356,8 +355,6 @@ int get_multiway_cut(ListDigraph &digraph, ListDigraph::ArcMap<int> &capacity, v
        cout << "-----" << endl << "Final print to make sure the graph has returned to original form: " << endl;
        printing_graph(digraph, capacity, terminals);
    }
-
-   return multiway_cut_cost;
 }
 
 

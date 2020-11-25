@@ -31,7 +31,7 @@ void Multiway1Solver::printing_graph(ListDigraph &digraph, ListDigraph::ArcMap<i
     cout << endl;
 }
 
-void Multiway1Solver::printing_multiway_vector(std::vector< std::vector <std::tuple <int, int> > > &multiway_cut)
+void Multiway1Solver::printing_multiway_vector(vector< vector <tuple <int, int> > > &multiway_cut)
 {
     cout << "Multiway_cut vector: " << endl;
     for(int i=0; i < multiway_cut.size(); i++)
