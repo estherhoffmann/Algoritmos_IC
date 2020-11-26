@@ -8,8 +8,9 @@
 #include <bits/stdc++.h> 
 
 //#include "Classes/Multiway1Solver.h"
-#include "Classes/MultiwayAlternativeSolver.h"
+//#include "Classes/MultiwayAlternativeSolver.h"
 //#include "Classes/MultiwayMixSolver.h"
+#include "Classes/MultiwaySortSolver.h"
 
 int DEBUG = 0;
 int DEBUG_RESULT = false;
@@ -42,10 +43,13 @@ int main(int argc, char** argv)
     //MultiwaySolver solver(DEBUG);
 
     // instantiating Multiwaycut Alternative (multiway3) Solver object 
-    MultiwayAlternativeSolver solver(DEBUG);
+    //MultiwayAlternativeSolver solver(DEBUG);
 
     // instantiating Multiwaycut Alternative Solver object
     //MultiwayMixSolver solver(DEBUG);
+
+    // instantiating Multiwaycut Sort Solver object
+    MultiwaySortSolver solver(DEBUG);
 
 
     // instantiating graph, arc map for edge costs, and vector of terminals
@@ -95,13 +99,14 @@ int main(int argc, char** argv)
         }  
     }
     
-    solver.get_multiway_cut(digraph, capacity, terminals, terminals_order, multiway_cut);
+    //solver.get_multiway_cut(digraph, capacity, terminals, terminals_order, multiway_cut);
+    solver.get_multiway_cut(digraph, capacity, terminals, multiway_cut);
 
     //set<pair<int, int>> cut_set;
     set<tuple<int, int, int>> cut_set;
     int multiway_cut_cost = 0;
-    multiway_cut_cost = solver.calculate_cost_and_get_list(digraph, capacity, multiway_cut, cut_set);
-    //multiway_cut_cost = solver.calculate_cost_and_get_list(multiway_cut, cut_set);
+    //multiway_cut_cost = solver.calculate_cost_and_get_list(digraph, capacity, multiway_cut, cut_set);
+    multiway_cut_cost = solver.calculate_cost_and_get_list(multiway_cut, cut_set);
 
 
     if (DEBUG_RESULT == true)
