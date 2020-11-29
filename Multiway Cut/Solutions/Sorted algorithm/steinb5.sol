@@ -1,5 +1,5 @@
 custo 148
-tempo 0.02
+tempo 0.00
 1 7
 1 35
 2 16

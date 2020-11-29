@@ -14,8 +14,11 @@ def print_requirement():
     print('4: BRKGA with SimpleMultiwaySolver')
     print('5: BRKGA with multiway1 solver\n')
 
-    print('The second argument specify the instances\' directories')
-    
+    print('The second argument specify the instances\' directories.\n')
+
+    print('If you want to run Alternative Solver, you also need to specify a third argument:')
+    print('0: if you want to run with the original terminal order. 1: if in random order.')
+    print('Example of usage: python run_all.py 1 steinb1.txt 0')
 
 # begin functions for human sorting
 def tryint(s):
@@ -32,23 +35,30 @@ def alphanum_key(s):
 def sort_nicely(l):
     #Sort the given list in the way that humans expect.
     l.sort(key=alphanum_key)
-
 # end functions for human sorting
 
-def save_table_file(which_algorithm, exec_file, instances_file):
+def save_table_file(which_algorithm, instances_file):
 
     if which_algorithm == 0:
         sols_file_dir = 'Solutions/Original algorithm/'
+        exec_file = 'multiway1'
+
     if which_algorithm == 1:
         sols_file_dir = 'Solutions/Alternative 2/'
+        exec_file = 'multiway_alternative'
+
     if which_algorithm == 2:
         sols_file_dir = 'Solutions/Mixed algorithm/'
+        exec_file = 'multiwaymix'
+        
     if which_algorithm == 3:
         sols_file_dir = 'Solutions/Sorted algorithm/'
+        exec_file = 'multiwaysort'
 
     if which_algorithm == 4:
         sols_file_dir = 'Solutions/BRKGA simple solver/'
         exec_file = 'simple_multiwaybrkga'
+
     if which_algorithm == 5:
         sols_file_dir = 'Solutions/BRKGA multiway1 solver perturb1/'
         exec_file = 'multiway1brkga_perturb1'
@@ -86,7 +96,7 @@ def save_table_file(which_algorithm, exec_file, instances_file):
     print('Done writing ' + table_file_path + '\n')
 
 
-def run_instances(exec_file, instances_file):
+def run_instances(exec_file, instances_file, shuffle):
     file_list = os.listdir(instances_file)
     sort_nicely(file_list)
 
@@ -94,8 +104,14 @@ def run_instances(exec_file, instances_file):
     for file_name in file_list:
         if DEBUG >= 1:
             print('Executing ' + exec_file + ' with ' + file_name)
-        os.system('./' + exec_file + ' '  + file_name + ' 0')
+
+        if shuffle == -1:
+            os.system('./' + exec_file + ' '  + file_name)
+        else:
+            os.system('./' + exec_file + ' '  + file_name + ' ' + shuffle)
+
         instance_cnt += 1
+
         if DEBUG >= 1:
             print()
 
@@ -108,32 +124,40 @@ def main():
     if len(sys.argv) <= 2:
         print_requirement()
         exit(0)
-
+    if sys.argv[1] == '1' and len(sys.argv) <= 3:
+        print_requirement()
+        exit(0)
+    
     which_algorithm = int(sys.argv[1].strip())
     instances_file = sys.argv[2].strip()
+    shuffle = -1
+
+    if which_algorithm == '1':
+        shuffle = sys.argv[3]
 
     if which_algorithm < 0 or which_algorithm > 5:
         print('This algorithm/sols type is not supported.')
+    
         exit(0)
     if not os.path.exists(instances_file):
         print('This instance directiory does not exist.')
         exit(0)
 
     if which_algorithm == 0:
-        exec_file = 'multiwat1'
+        exec_file = 'run_multiwaysolver 0'
     if which_algorithm == 1:
-        exec_file = 'multiway3'
+        exec_file = 'run_multiwaysolver 1'
     if which_algorithm == 2:
-        exec_file = 'multiwaymix'
+        exec_file = 'run_multiwaysolver 2'
     if which_algorithm == 3:
-        exec_file = 'multiwaysort'
+        exec_file = 'run_multiwaysolver 3'
     if which_algorithm == 4:
         exec_file = 'multiwaybrkga 0' # 4: BRKGA with SimpleMultiwaySolver
     if which_algorithm == 5:
         exec_file = 'multiwaybrkga 1' # 5: BRKGA with multiway1 solver
 
-    run_instances(exec_file, instances_file)
-    save_table_file(which_algorithm, exec_file, instances_file)
+    run_instances(exec_file, instances_file, shuffle)
+    save_table_file(which_algorithm, instances_file)
 
 
 if __name__ == "__main__":
