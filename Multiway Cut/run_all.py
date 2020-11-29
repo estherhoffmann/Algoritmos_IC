@@ -7,11 +7,12 @@ def print_requirement():
     print('This script requires two arguments.\n')
 
     print('In the first argument you choose which algorithm you want to run:')
-    print('0: original min cut based algorithm (./multiway1')
+    print('0: original min cut based algorithm (./multiway1)')
     print('1: alternative (./multiway3)')
     print('2: mixed (./multiwaymix)')
-    print('3: BRKGA with SimpleMultiwaySolver')
-    print('4: BRKGA with multiway1 solver\n')
+    print('3: sorted (./multiwaysort)')
+    print('4: BRKGA with SimpleMultiwaySolver')
+    print('5: BRKGA with multiway1 solver\n')
 
     print('The second argument specify the instances\' directories')
     
@@ -43,9 +44,12 @@ def save_table_file(which_algorithm, exec_file, instances_file):
     if which_algorithm == 2:
         sols_file_dir = 'Solutions/Mixed algorithm/'
     if which_algorithm == 3:
+        sols_file_dir = 'Solutions/Sorted algorithm/'
+
+    if which_algorithm == 4:
         sols_file_dir = 'Solutions/BRKGA simple solver/'
         exec_file = 'simple_multiwaybrkga'
-    if which_algorithm == 4:
+    if which_algorithm == 5:
         sols_file_dir = 'Solutions/BRKGA multiway1 solver perturb1/'
         exec_file = 'multiway1brkga_perturb1'
 
@@ -90,7 +94,7 @@ def run_instances(exec_file, instances_file):
     for file_name in file_list:
         if DEBUG >= 1:
             print('Executing ' + exec_file + ' with ' + file_name)
-        os.system('./' + exec_file + " "  + file_name)
+        os.system('./' + exec_file + ' '  + file_name + ' 0')
         instance_cnt += 1
         if DEBUG >= 1:
             print()
@@ -108,7 +112,7 @@ def main():
     which_algorithm = int(sys.argv[1].strip())
     instances_file = sys.argv[2].strip()
 
-    if which_algorithm < 0 or which_algorithm > 4:
+    if which_algorithm < 0 or which_algorithm > 5:
         print('This algorithm/sols type is not supported.')
         exit(0)
     if not os.path.exists(instances_file):
@@ -122,11 +126,13 @@ def main():
     if which_algorithm == 2:
         exec_file = 'multiwaymix'
     if which_algorithm == 3:
-        exec_file = 'multiwaybrkga 0' # 3: BRKGA with SimpleMultiwaySolver
+        exec_file = 'multiwaysort'
     if which_algorithm == 4:
-        exec_file = 'multiwaybrkga 1' # 4: BRKGA with multiway1 solver
+        exec_file = 'multiwaybrkga 0' # 4: BRKGA with SimpleMultiwaySolver
+    if which_algorithm == 5:
+        exec_file = 'multiwaybrkga 1' # 5: BRKGA with multiway1 solver
 
-    #run_instances(exec_file, instances_file)
+    run_instances(exec_file, instances_file)
     save_table_file(which_algorithm, exec_file, instances_file)
 
 

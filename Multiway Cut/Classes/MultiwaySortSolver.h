@@ -21,6 +21,7 @@ private:
     int position_highest_value_in_vector(vector<int>&); 
     void update_multiwaycut_and_arcs(ListDigraph&, ListDigraph::NodeMap<bool>&, ListDigraph::ArcMap<int>&, vector<vector<tuple <int, int, int>>>&);
 
+    // run multiway1 and returns a vector with terminals' ID in crescent order of mincut
     vector<int> get_terminal_order(vector<int>);
 
     // runs original multiway cut algorithm and returns vector with desirable terminal order

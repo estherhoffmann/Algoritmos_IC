@@ -18,12 +18,13 @@ MultiwaySortSolver::~MultiwaySortSolver() { }
 
 void MultiwaySortSolver::printing_graph(ListDigraph &digraph, ListDigraph::ArcMap<int> &capacity, vector<int> &terminals)
 {
-    for (ListDigraph::ArcIt m(digraph); m != INVALID; ++m)
-    {
-        cout << "Arc: (" << digraph.id(digraph.source(m))+1
-            << ", " << digraph.id(digraph.target(m))+1
-            << "), cost: " << capacity[m] << endl;
-    }
+    if (DEBUG > 2)
+        for (ListDigraph::ArcIt m(digraph); m != INVALID; ++m)
+        {
+            cout << "Arc: (" << digraph.id(digraph.source(m))+1
+                << ", " << digraph.id(digraph.target(m))+1
+                << "), cost: " << capacity[m] << endl;
+        }
 
     cout << endl << "Number of nodes: " << countNodes(digraph) << endl
          << "Number of arcs: " << countArcs(digraph) << endl
@@ -198,25 +199,31 @@ vector<int> MultiwaySortSolver::get_terminal_order(vector<int> min_cut_values)
     vector<int> terminals_order(min_cut_values.size());
     iota(terminals_order.begin(),terminals_order.end(), 0);
 
-    cout << "Terminals order: ";
-    for(int i=0; i < terminals_order.size(); i++)
-        cout << terminals_order[i] << ' ';
-    cout << endl;
+    if (DEBUG > 0)
+    {
+        cout << "Terminals order: ";
+        for(int i=0; i < terminals_order.size(); i++)
+            cout << terminals_order[i] << ' ';
+        cout << endl;
 
-    cout << "Min cut values: ";
-    for(int i=0; i < terminals_order.size(); i++)
-        cout << min_cut_values[i] << ' ';
-    cout << endl << endl;
+        cout << "Min cut values: ";
+        for(int i=0; i < terminals_order.size(); i++)
+            cout << min_cut_values[i] << ' ';
+        cout << endl;
+    }
 
+    // sorting terminals_order, using min_cut_values to compare
     stable_sort(terminals_order.begin(), terminals_order.end(),
        [&min_cut_values](size_t i1, size_t i2) {return min_cut_values[i1] < min_cut_values[i2];});
 
-    cout << "Terminals order: ";
-    for(int i=0; i < terminals_order.size(); i++)
-        cout << terminals_order[i] << ' ';
-    cout << endl << endl;
+    if (DEBUG > 0)
+    {
+        cout << "Terminals order: ";
+        for(int i=0; i < terminals_order.size(); i++)
+            cout << terminals_order[i] << ' ';
+        cout << endl << endl;
+    }
 
-    exit(0);
     return terminals_order;
 }
 
@@ -245,7 +252,7 @@ vector<int> MultiwaySortSolver::get_expensivest_cut(ListDigraph &digraph, ListDi
 
         if (DEBUG >= 2)
         {
-            cout <<  "-----" << endl << "Iteration with source = terminal " << terminals[current_term] << endl << endl;
+            cout <<  "-----" << endl << "Iteration with source = terminal " << terminals[current_term]+1 << endl << endl;
             if (DEBUG >=4)
             {
                 printing_graph(digraph, capacity, terminals);
@@ -279,44 +286,50 @@ vector<int> MultiwaySortSolver::get_expensivest_cut(ListDigraph &digraph, ListDi
 }
 
 
-// finds max flow for each terminal and stores all cut edges in multiway_cut
-void MultiwaySortSolver::get_multiway_cut(ListDigraph &digraph, ListDigraph::ArcMap<int> &capacity, vector<int> &terminals,
-                   vector<vector<tuple <int, int, int>>> &multiway_cut)
+/* 
+    finds max flow for each terminal and stores all cut edges in multiway_cut.
+    vector terminals_order determinates the order in which the algorithm will calculate min cuts.
+    the first min cut will be calculated for terminals[terminals_order[0]] vertex
+    so, for all x in terminals_order, 0 < x < terminals.size()
+*/
+void MultiwaySortSolver::get_multiway_cut(ListDigraph &digraph, ListDigraph::ArcMap<int> &capacity, vector<int> &terminals, 
+                    vector<vector<tuple <int, int, int>>> &multiway_cut)
 {
     // stores nodemap of maxflow algorithm
     ListDigraph::NodeMap<bool> mincut(digraph);
+
+    //keeps the max flow value of each iteration
+    vector<int> min_cut_values; 
+
+    // gets terminal order running multiway1
     vector<int> terminals_order = get_expensivest_cut(digraph, capacity, mincut, terminals, multiway_cut);
-
-    vector<int> min_cut_values; //keeps the max flow value of each iteration
-
+ 
     ListDigraph::Node artificial_sink = digraph.addNode();
     ListDigraph::Arc infinity_arc;
 
-    // creating "infinity" arcs from all the terminals to the artificial_sink
+    //creating "infinity" arcs from all the terminals to the artificial_sink
     for (int t = 0; t < terminals.size(); t++)
     {
         infinity_arc = digraph.addArc(digraph.nodeFromId(terminals[t]), artificial_sink);
         capacity[infinity_arc] = numeric_limits<int>::max();
     }
 
-    int multiway_cut_index = 0;
-
-    // computing mincut for each terminal and getting the arcs of the cut
-    // except for expensivest terminal in the original algorithm
-    for (int current_term = 0; current_term < terminals.size(); current_term++)
+    //computing mincut for each terminal and getting the arcs of the cut
+    for (int current_term = 0; current_term < terminals_order.size(); current_term++)
     {
-
-        digraph.erase(findArc(digraph, digraph.nodeFromId(terminals[current_term]), artificial_sink));
+        digraph.erase(findArc(digraph, digraph.nodeFromId(terminals[terminals_order[current_term]]), artificial_sink));
 
         if (DEBUG >= 2)
         {
-            cout <<  "-----" << endl << "Iteration with source = terminal " << terminals[current_term]+1 << endl << endl;
+            cout <<  "-----" << endl << "Iteration with source = terminal " << terminals[terminals_order[current_term]]+1 << endl << endl;
             if (DEBUG >=4)
+            {
                 printing_graph(digraph, capacity, terminals);
+            }
         }
 
         //min-cut algorithm from lemon
-        Preflow<ListDigraph> preflow(digraph, capacity, digraph.nodeFromId(terminals[current_term]), artificial_sink);
+        Preflow<ListDigraph> preflow(digraph, capacity, digraph.nodeFromId(terminals[terminals_order[current_term]]), artificial_sink);
         preflow.runMinCut();
         preflow.minCutMap(mincut);
         min_cut_values.push_back(preflow.flowValue());
@@ -325,16 +338,16 @@ void MultiwaySortSolver::get_multiway_cut(ListDigraph &digraph, ListDigraph::Arc
 
         /* in this alternative, we delete from the graph the mincut of each iteration,
             so each terminal is already separate and there is no duplicated cut arcs */
-        for(int arc_index = 0; arc_index < multiway_cut[multiway_cut_index].size(); arc_index++)
+        for(int arc_index = 0; arc_index < multiway_cut[current_term].size(); arc_index++)
         {
-            digraph.erase(findArc(digraph, digraph.nodeFromId((get<0>(multiway_cut[multiway_cut_index][arc_index]))-1),
-                                            digraph.nodeFromId((get<1>(multiway_cut[multiway_cut_index][arc_index])-1))));
+            digraph.erase(findArc(digraph, digraph.nodeFromId((get<0>(multiway_cut[current_term][arc_index]))-1),
+                                            digraph.nodeFromId((get<1>(multiway_cut[current_term][arc_index])-1))));
         }
-        multiway_cut_index++;
 
     }
 
-    // we also dont need to get rid of the expensivest cut because we will not compute a cut for the "expensivest terminal"
+    /* we also dont need to get rid of the expensivest cut because we will not compute a cut for the
+        last terminal, since there will be no terminal connected in the graph */
 }
 
 
