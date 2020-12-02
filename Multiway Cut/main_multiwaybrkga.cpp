@@ -175,7 +175,7 @@ int main(int argc, char** argv)
         save_result(file_name, "BRKGA simple solver/", cut_set, cut_cost, time_taken);
 
     if (which_solver == "1")
-        save_result(file_name, "BRKGA multiway1 solver perturb2/", cut_set, cut_cost, time_taken);
+        save_result(file_name, "BRKGA multiway1 solver perturb2 n=4/", cut_set, cut_cost, time_taken);
 
     return 0;
 }

@@ -60,8 +60,8 @@ def save_table_file(which_algorithm, instances_file):
         exec_file = 'simple_multiwaybrkga'
 
     if which_algorithm == 5:
-        sols_file_dir = 'Solutions/BRKGA multiway1 solver perturb1/'
-        exec_file = 'multiway1brkga_perturb1'
+        sols_file_dir = 'Solutions/BRKGA multiway1 solver perturb2 n=4/'
+        exec_file = 'multiway1brkga_perturb2_n4'
 
     table_file_name = exec_file +'_table'
     table_file_path = 'Solutions/' + table_file_name + ".txt"
@@ -156,7 +156,7 @@ def main():
     if which_algorithm == 5:
         exec_file = 'multiwaybrkga 1' # 5: BRKGA with multiway1 solver
 
-    run_instances(exec_file, instances_file, shuffle)
+    #run_instances(exec_file, instances_file, shuffle)
     save_table_file(which_algorithm, instances_file)
 
 

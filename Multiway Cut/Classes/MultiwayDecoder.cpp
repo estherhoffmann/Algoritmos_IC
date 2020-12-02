@@ -83,7 +83,7 @@ double MultiwayDecoder::decode(const std::vector< double >& chromosome) const
 
                 sendo alpha M = 2^(N/2). Para o alelo = 0.5 ser neutro, é necessário que  N = 20, M = 2^10 (1024).
             */
-            perturbed_costs[arc] = (int)( 1024 * capacity[arc] ) / ( pow(2, 20*chromosome[chromosome_index]) );
+            perturbed_costs[arc] = (int)( 4 * capacity[arc] ) / ( pow(2, 4*chromosome[chromosome_index]) );
 
             ListDigraph::Arc reverse_arc = findArc(digraph, digraph.target(arc), digraph.source(arc));
 
@@ -91,7 +91,7 @@ double MultiwayDecoder::decode(const std::vector< double >& chromosome) const
             //perturbed_costs[reverse_arc] = ( 1 - perturb_intensity + ( 2 * perturb_intensity * chromosome[chromosome_index] ) ) * capacity[reverse_arc];
 
             // Perturbação Mário
-            perturbed_costs[reverse_arc] = (int)( 1024 * capacity[reverse_arc] ) / ( pow(2, 20*chromosome[chromosome_index]) );
+            perturbed_costs[reverse_arc] = (int)( 4 * capacity[reverse_arc] ) / ( pow(2, 4*chromosome[chromosome_index]) );
 
             chromosome_index++;
         }
@@ -151,7 +151,7 @@ void MultiwayDecoder::get_multiway_cut(const std::vector< double >& chromosome, 
 
                 sendo alpha M = 2^(N/2). Para o alelo = 0.5 ser neutro, é necessário que  N = 20, M = 2^10 (1024).
             */
-            perturbed_costs[arc] = (int)( 1024 * capacity[arc] ) / ( pow(2, 20*chromosome[chromosome_index]) );
+            perturbed_costs[arc] = (int)( 4 * capacity[arc] ) / ( pow(2, 4*chromosome[chromosome_index]) );
 
             ListDigraph::Arc reverse_arc = findArc(digraph, digraph.target(arc), digraph.source(arc));
 
@@ -159,7 +159,7 @@ void MultiwayDecoder::get_multiway_cut(const std::vector< double >& chromosome, 
             //perturbed_costs[reverse_arc] = ( 1 - perturb_intensity + ( 2 * perturb_intensity * chromosome[chromosome_index] ) ) * capacity[reverse_arc];
 
             // Perturbação Mário
-            perturbed_costs[reverse_arc] = (int)( 1024 * capacity[reverse_arc] ) / ( pow(2, 20*chromosome[chromosome_index]) );
+            perturbed_costs[reverse_arc] = (int)( 4 * capacity[reverse_arc] ) / ( pow(2, 4*chromosome[chromosome_index]) );
 
             chromosome_index++;
         }
