@@ -63,6 +63,10 @@ void MultiwayAlternativeSolver::printing_cut_list(set<tuple<int, int, int>>& cut
 bool MultiwayAlternativeSolver::read_file(ListDigraph &digraph, string file_name,
                 ListDigraph::ArcMap<int> &capacity, vector<int> &terminals)
 {
+    // cleaning stuff first
+    digraph.clear();
+    terminals.clear();
+
     int num_of_e, num_of_v, num_of_t, source, target, weight;
     ListDigraph::Arc arc;
 
@@ -242,7 +246,7 @@ void MultiwayAlternativeSolver::get_multiway_cut(ListDigraph &digraph, ListDigra
 // saves our result in file
 int MultiwayAlternativeSolver::save_result_in_file(string file_name, set<tuple<int, int, int>>& cut_list, int multiway_cut_cost, double exec_time)
 {
-    string full_path = "Solutions/Alternative 2/" + file_name.substr(0, file_name.find(".")) + ".sol";
+    string full_path = "Solutions/Alternative 2 Shuffle=100/" + file_name.substr(0, file_name.find(".")) + ".sol";
     cout << full_path << endl;
     ofstream sol_file(full_path);
 

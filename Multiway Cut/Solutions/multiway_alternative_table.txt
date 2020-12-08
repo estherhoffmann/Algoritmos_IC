@@ -1,0 +1,2 @@
+inst num_v num_e num_t custo tempo
+steinb1 50 63 9 59 0.00

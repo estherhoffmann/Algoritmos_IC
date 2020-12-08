@@ -44,8 +44,8 @@ def save_table_file(which_algorithm, instances_file):
         exec_file = 'multiway1'
 
     if which_algorithm == 1:
-        sols_file_dir = 'Solutions/Alternative 2/'
-        exec_file = 'multiway_alternative'
+        sols_file_dir = 'Solutions/Alternative 2 Shuffle=100/'
+        exec_file = 'multiway_alternative_shuffle100'
 
     if which_algorithm == 2:
         sols_file_dir = 'Solutions/Mixed algorithm/'
@@ -108,6 +108,7 @@ def run_instances(exec_file, instances_file, shuffle):
         if shuffle == -1:
             os.system('./' + exec_file + ' '  + file_name)
         else:
+            print('./' + exec_file + ' '  + file_name + ' ' + shuffle)
             os.system('./' + exec_file + ' '  + file_name + ' ' + shuffle)
 
         instance_cnt += 1
@@ -129,10 +130,11 @@ def main():
         exit(0)
     
     which_algorithm = int(sys.argv[1].strip())
+    print(which_algorithm)
     instances_file = sys.argv[2].strip()
     shuffle = -1
 
-    if which_algorithm == '1':
+    if which_algorithm == 1:
         shuffle = sys.argv[3]
 
     if which_algorithm < 0 or which_algorithm > 5:
@@ -156,7 +158,7 @@ def main():
     if which_algorithm == 5:
         exec_file = 'multiwaybrkga 1' # 5: BRKGA with multiway1 solver
 
-    #run_instances(exec_file, instances_file, shuffle)
+    run_instances(exec_file, instances_file, shuffle)
     save_table_file(which_algorithm, instances_file)
 
 
