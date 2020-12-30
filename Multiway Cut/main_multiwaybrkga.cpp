@@ -3,10 +3,16 @@
 #include <iomanip>
 #include <stdlib.h>
 #include <fstream>
+
 #include "Classes/SimpleMultiwayDecoder.h"
 #include "Classes/MultiwayDecoder.h"
 #include "BRKGA/MTRand.h"
 #include "BRKGA/BRKGA.h"
+
+#include "Classes/Multiway1Solver.h"
+#include "Classes/MultiwayAlternativeSolver.h"
+#include "Classes/MultiwayMixSolver.h"
+#include "Classes/MultiwaySortSolver.h"
 
 using namespace std;
 
@@ -82,7 +88,7 @@ void run_BRKGA(string file_name, int& cost, set<pair<int, int>>& cut_set)
     int num_of_e = decoder.get_num_of_e();
     int num_of_t = decoder.get_num_of_t();
 
-    const unsigned n = num_of_e;		// size of chromosomes
+    const unsigned n = num_of_e - 1;		        // size of chromosomes
 	const unsigned p = 100;	                        // size of population
 	const double pe = 0.20;		                    // fraction of population to be the elite-set
 	const double pm = 0.10;		                    // fraction of population to be replaced by mutants
