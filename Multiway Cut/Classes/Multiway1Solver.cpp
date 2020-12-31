@@ -20,7 +20,8 @@ void Multiway1Solver::printing_graph(ListDigraph &digraph, ListDigraph::ArcMap<i
     {
         cout << "Arc: (" << digraph.id(digraph.source(m))+1
             << ", " << digraph.id(digraph.target(m))+1
-            << "), cost: " << capacity[m] << endl;
+            << "), cost: " << capacity[m]
+            << ", id: " << digraph.id(m) << endl;
     }
 
     cout << endl << "Number of nodes: " << countNodes(digraph) << endl

@@ -194,24 +194,30 @@ void MultiwayDecoder::turn_into_chromossome(set<tuple<int, int, int>> cut_set, v
     // Como o vetor de chromossomo é usado na ordem que o lemon itera sobre as arestas,
     // vamos iterar sob todas as arestas para pegar as posições dessas no chromossomo
     // e alterar o valor do alelo nas arestas que estão no corte
-    int chromosome_index = 0;
     tuple<int, int, int> aux_tuple, aux_reverse_tuple;
-    
-    // Preenche aux_chromossome com -1.0 -> para identificar quais já foram alterados
-    for(int i=0; i < aux_chromossome.size(); i++)
-        aux_chromossome[i] = -1.0;
+    ListDigraph::ArcMap<bool> visited(digraph);
+    ListDigraph::Arc reverse_arc;
+    int chromosome_index = 0;
 
     for(ListDigraph::ArcIt arc(digraph); arc != INVALID; ++arc)
     {   
-        if(aux_chromossome[chromosome_index] == -1)
+        if(visited[arc] == false)
         {
             aux_tuple = make_tuple(digraph.id(digraph.source(arc)), digraph.id(digraph.target(arc)), capacity[arc]);
             aux_reverse_tuple = make_tuple(digraph.id(digraph.target(arc)), digraph.id(digraph.source(arc)), capacity[arc]);
 
-            if ((cut_set.find(aux_tuple) != cut_set.end()) || (cut_set.find(aux_tuple) != cut_set.end()))
+            if ((cut_set.find(aux_tuple) != cut_set.end()) || (cut_set.find(aux_reverse_tuple) != cut_set.end()))
             {
-
+                aux_chromossome[chromosome_index] = 0.9;
             }
+            else
+            {
+                aux_chromossome[chromosome_index] = 0.1;
+            }
+            
+            visited[arc] = true;
+            reverse_arc = findArc(digraph, digraph.target(arc), digraph.source(arc));
+            visited[reverse_arc] = true;
 
             chromosome_index++;
         }
