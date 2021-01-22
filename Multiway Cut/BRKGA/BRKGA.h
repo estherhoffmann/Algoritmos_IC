@@ -96,6 +96,13 @@ public:
 	void exchangeElite(unsigned M);
 
 	/**
+     * Set individuals to initial population (only one population in case of multiple ones).
+     * @param chromosomes a set of individuals described as double vectors
+     *        between 0 and 1.
+     */
+    void setInitialPopulation(const std::vector< std::vector< double > >& chromosomes, int ini_population_size, int population);
+
+	/**
 	 * Returns the current population
 	 */
 	const Population& getPopulation(unsigned k = 0) const;
@@ -248,6 +255,24 @@ void BRKGA< Decoder, RNG >::exchangeElite(unsigned M) {
 	}
 
 	for(int j = 0; j < int(K); ++j) { current[j]->sortFitness(); }
+}
+
+template< class Decoder, class RNG >
+void BRKGA< Decoder, RNG >::setInitialPopulation(const std::vector< std::vector< double > >& chromosomes, int ini_population_size, int population) {
+    //current[0] = new Population(n, chromosomes.size());
+    unsigned i = 0;
+
+    for(std::vector< std::vector< double > >::const_iterator it_chrom = chromosomes.begin();
+        it_chrom != chromosomes.end() && i < ini_population_size; ++it_chrom, ++i) {
+
+        if(it_chrom->size() != n) {
+            throw std::runtime_error("Error on setting initial population: number of genes isn't equal!");
+        }
+        std::copy(it_chrom->begin(), it_chrom->end(), current[population]->population[i].begin());
+        //std::cout << "VOU CALCULAR CUSTO" << std::endl;
+        current[population]->setFitness(i, refDecoder.decode((*current[population])(i)) );
+    }
+    current[population]->sortFitness();
 }
 
 template< class Decoder, class RNG >

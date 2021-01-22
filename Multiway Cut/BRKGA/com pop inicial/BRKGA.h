@@ -69,7 +69,7 @@ public:
 	 *                + double Decoder::decode(std::vector< double >& chromosome) const
 	 */
 	BRKGA(unsigned n, unsigned p, double pe, double pm, double rhoe,
-			Decoder& refDecoder, RNG& refRNG, unsigned K = 1, unsigned MAX_THREADS = 1);
+			const Decoder& refDecoder, RNG& refRNG, unsigned K = 1, unsigned MAX_THREADS = 1);
 
 	/**
 	 * Destructor
@@ -95,6 +95,13 @@ public:
 	 */
 	void exchangeElite(unsigned M);
 
+    /**
+     * Set individuals to initial population (only one population in case of multiple ones).
+     * @param chromosomes a set of individuals described as double vectors
+     *        between 0 and 1.
+     */
+    void setInitialPopulation(const std::vector< std::vector< double > >& chromosomes, int ini_population_size, int population);
+    void replaceWorst(const std::vector< std::vector< double > >& chromosomes, int population_size, int population);
 	/**
 	 * Returns the current population
 	 */
@@ -130,7 +137,7 @@ private:
 
 	// Templates:
 	RNG& refRNG;				// reference to the random number generator
-	Decoder& refDecoder;	// reference to the problem-dependent Decoder
+	const Decoder& refDecoder;	// reference to the problem-dependent Decoder
 
 	// Parallel populations parameters:
 	const unsigned K;				// number of independent parallel populations
@@ -148,7 +155,7 @@ private:
 
 template< class Decoder, class RNG >
 BRKGA< Decoder, RNG >::BRKGA(unsigned _n, unsigned _p, double _pe, double _pm, double _rhoe,
-		Decoder& decoder, RNG& rng, unsigned _K, unsigned MAX) : n(_n), p(_p),
+		const Decoder& decoder, RNG& rng, unsigned _K, unsigned MAX) : n(_n), p(_p),
 		pe(unsigned(_pe * p)), pm(unsigned(_pm * p)), rhoe(_rhoe),
 		refRNG(rng), refDecoder(decoder), K(_K), MAX_THREADS(MAX),
 		previous(K, 0), current(K, 0) {
@@ -250,11 +257,53 @@ void BRKGA< Decoder, RNG >::exchangeElite(unsigned M) {
 	for(int j = 0; j < int(K); ++j) { current[j]->sortFitness(); }
 }
 
+
+template< class Decoder, class RNG >
+void BRKGA< Decoder, RNG >::setInitialPopulation(const std::vector< std::vector< double > >& chromosomes, int ini_population_size, int population) {
+    //current[0] = new Population(n, chromosomes.size());
+    unsigned i = 0;
+
+    for(std::vector< std::vector< double > >::const_iterator it_chrom = chromosomes.begin();
+        it_chrom != chromosomes.end() && i < ini_population_size; ++it_chrom, ++i) {
+
+        if(it_chrom->size() != n) {
+            throw std::runtime_error("Error on setting initial population: number of genes isn't equal!");
+        }
+        std::copy(it_chrom->begin(), it_chrom->end(), current[population]->population[i].begin());
+        //std::cout << "VOU CALCULAR CUSTO" << std::endl;
+        current[population]->setFitness(i, refDecoder.decode((*current[population])(i)) );
+    }
+    current[population]->sortFitness();
+}
+
+template< class Decoder, class RNG >
+void BRKGA< Decoder, RNG >::replaceWorst(const std::vector< std::vector< double > >& chromosomes, int population_size, int population) {
+    //current[0] = new Population(n, chromosomes.size());
+    unsigned i = p-1;
+
+    //std::cerr << "Vou entrar no for" << std::endl;
+    for(std::vector< std::vector< double > >::const_iterator it_chrom = chromosomes.begin();
+        it_chrom != chromosomes.end() && i > p - population_size; ++it_chrom, --i) {
+
+        if(it_chrom->size() != n) {
+            throw std::runtime_error("Error on setting initial population: number of genes isn't equal!");
+        }
+        //std::cerr << "Vou copiar" << std::endl;
+        std::copy(it_chrom->begin(), it_chrom->end(), current[population]->population[i].begin());
+        //std::cout << "VOU CALCULAR CUSTO" << std::endl;
+        current[population]->setFitness(i, refDecoder.decode((*current[population])(i)) );
+    }
+    //std::cerr << "Vou ordenar" << std::endl;
+    current[population]->sortFitness();
+}
+
 template< class Decoder, class RNG >
 inline void BRKGA< Decoder, RNG >::initialize(const unsigned i) {
 	for(unsigned j = 0; j < p; ++j) {
 		for(unsigned k = 0; k < n; ++k) { (*current[i])(j, k) = refRNG.rand(); }
 	}
+
+	//std::cout << "INICIALIZANDO" << std::endl;
 
 	// Decode:
 	#ifdef _OPENMP
@@ -305,8 +354,14 @@ inline void BRKGA< Decoder, RNG >::evolution(Population& curr, Population& next)
 	}
 
 	// We'll introduce 'pm' mutants:
-	while(i < p) {
+	/*while(i < p) {
 		for(j = 0; j < n; ++j) { next(i, j) = refRNG.rand(); }
+		++i;
+	}*/
+	while(i < p) {
+		for(j = 0; j < n; ++j) {
+			next(i, j) = refRNG.rand();
+		}
 		++i;
 	}
 

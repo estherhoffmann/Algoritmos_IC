@@ -42,7 +42,7 @@ void run_simple_BRKGA(string file_name, int& cost, set<pair<int, int>>& cut_set)
     int num_of_v = decoder.get_num_of_v();
     int num_of_t = decoder.get_num_of_t();
 
-    const unsigned n = (num_of_v - num_of_t) -1;    // size of chromosomes
+    const unsigned n = (num_of_v - num_of_t);    // size of chromosomes
 	const unsigned p = 1000;	                    // size of population
 	const double pe = 0.20;		                    // fraction of population to be the elite-set
 	const double pm = 0.10;		                    // fraction of population to be replaced by mutants
@@ -83,7 +83,7 @@ void run_BRKGA(string file_name, int& cost, set<pair<int, int>>& cut_set)
     int num_of_e = decoder.get_num_of_e();
     int num_of_t = decoder.get_num_of_t();
 
-    const unsigned n = num_of_e - 1;		        // size of chromosomes
+    const unsigned n = num_of_e;		        // size of chromosomes
 	const unsigned p = 100;	                        // size of population
 	const double pe = 0.20;		                    // fraction of population to be the elite-set
 	const double pm = 0.10;		                    // fraction of population to be replaced by mutants

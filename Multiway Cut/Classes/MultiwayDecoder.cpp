@@ -172,59 +172,6 @@ void MultiwayDecoder::get_multiway_cut(const std::vector< double >& chromosome, 
     multiway_cut_cost = solver.calculate_cost_and_get_list(digraph, capacity, multiway_cut, cut_set);
 }
 
-
-// Arestas do corte recebem 0.9 no cromossomo. Demais arestas recebem 0.1
-void MultiwayDecoder::turn_into_chromossome(set<tuple<int, int, int>> cut_set, vector<double> aux_chromossome)
-{
-
-    // instantiating Multiwaycut Solver object
-    Multiway1Solver solver(0);
-
-    // instantiating graph, arc map for edge costs, and vector of terminals
-    ListDigraph digraph;
-    ListDigraph::ArcMap<int> capacity(digraph);
-    vector<int> terminals;
-
-    if(!solver.read_file(digraph, file, capacity, terminals))
-    {
-        cout << "Could not open the file." << endl;
-        return;
-    }
-
-    // Como o vetor de chromossomo é usado na ordem que o lemon itera sobre as arestas,
-    // vamos iterar sob todas as arestas para pegar as posições dessas no chromossomo
-    // e alterar o valor do alelo nas arestas que estão no corte
-    tuple<int, int, int> aux_tuple, aux_reverse_tuple;
-    ListDigraph::ArcMap<bool> visited(digraph);
-    ListDigraph::Arc reverse_arc;
-    int chromosome_index = 0;
-
-    for(ListDigraph::ArcIt arc(digraph); arc != INVALID; ++arc)
-    {   
-        if(visited[arc] == false)
-        {
-            aux_tuple = make_tuple(digraph.id(digraph.source(arc)), digraph.id(digraph.target(arc)), capacity[arc]);
-            aux_reverse_tuple = make_tuple(digraph.id(digraph.target(arc)), digraph.id(digraph.source(arc)), capacity[arc]);
-
-            if ((cut_set.find(aux_tuple) != cut_set.end()) || (cut_set.find(aux_reverse_tuple) != cut_set.end()))
-            {
-                aux_chromossome[chromosome_index] = 0.9;
-            }
-            else
-            {
-                aux_chromossome[chromosome_index] = 0.1;
-            }
-            
-            visited[arc] = true;
-            reverse_arc = findArc(digraph, digraph.target(arc), digraph.source(arc));
-            visited[reverse_arc] = true;
-
-            chromosome_index++;
-        }
-    }
-}
-
-
 int MultiwayDecoder::get_num_of_v() const { return num_of_v; }
 int MultiwayDecoder::get_num_of_e() const { return num_of_e; }
 int MultiwayDecoder::get_num_of_t() const { return num_of_t; }

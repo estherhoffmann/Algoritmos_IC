@@ -18,7 +18,7 @@ MultiwaySortSolver::~MultiwaySortSolver() { }
 
 void MultiwaySortSolver::printing_graph(ListDigraph &digraph, ListDigraph::ArcMap<int> &capacity, vector<int> &terminals)
 {
-    if (DEBUG > 2)
+    if (DEBUG > 1)
         for (ListDigraph::ArcIt m(digraph); m != INVALID; ++m)
         {
             cout << "Arc: (" << digraph.id(digraph.source(m))+1
