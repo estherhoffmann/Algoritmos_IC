@@ -162,7 +162,7 @@ int main(int argc, char** argv)
 
         if (shuffle == true)
         {
-            for (int k=0; k < 100; k++)
+            for (int k=0; k < 20; k++)
             {
 
                 srand (time(NULL));  

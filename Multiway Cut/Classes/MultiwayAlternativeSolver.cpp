@@ -246,7 +246,7 @@ void MultiwayAlternativeSolver::get_multiway_cut(ListDigraph &digraph, ListDigra
 // saves our result in file
 int MultiwayAlternativeSolver::save_result_in_file(string file_name, set<tuple<int, int, int>>& cut_list, int multiway_cut_cost, double exec_time)
 {
-    string full_path = "Solutions/Alternative 2 Shuffle=100/" + file_name.substr(0, file_name.find(".")) + ".sol";
+    string full_path = "Solutions/Alternative 2 Shuffle=20/" + file_name.substr(0, file_name.find(".")) + ".sol";
     cout << full_path << endl;
     ofstream sol_file(full_path);
 
